@@ -5160,7 +5160,7 @@ window.MCP = {finalModels:MCP_FINAL_MODELS,finalPools:()=>mcpFinalPools,multiSet
 for(const g of ['lc','op']){const id=store.get('mcp_active_set_v48_'+g);if(id&&MCP_REGULAR_SETS[g][id]&&id!==mcpActive[g])mcpSelectSet(g,id)}
 // v60: additive shared wallet and explicit duplicate exchanges; collection schemas unchanged.
 const MCP60_KEY='mcp_rewards_v60';
-const MCP60_VALUES={C:20,U:40,R:150,E:400,A:1000,L:2000,D1:20,D2:40,D3:150,D4:400,S1:800,S2:1500,S3:3000,SH1:800,SH2:1500,CR:5000,T1:15,T2:30,T3:120,TH:180,T4:450,T9:600,T5:1200,T6:900,T7:3000,T8:3000,TP:150,TC:900,TF:3000,TM:6000,TR:3000,TG:900,GG:900,SVT:900,LC1:15,LC2:30,LC3:120,LC4:375,LC5:1125,LC6:4500,LC7:6000,LC8:9000,OPC:15,OPUC:30,OPR:120,OPL:120,OPSR:600,OPSEC:1500,OPAA:3000,OPBT:750,OPX:4500,OPM:12000};
+const MCP60_VALUES={C:20,U:40,R:150,E:400,A:1000,L:2000,D1:20,D2:40,D3:150,D4:400,S1:800,S2:1500,S3:3000,SH1:800,SH2:1500,CR:5000,T1:13,T2:30,T3:80,TH:120,T4:300,T9:400,T5:800,T6:600,T7:2000,T8:2000,TP:100,TC:600,TF:2000,TM:4000,TR:2000,TG:600,GG:600,SVT:600,LC1:20,LC2:30,LC3:80,LC4:250,LC5:750,LC6:3000,LC7:4000,LC8:6000,OPC:20,OPUC:30,OPR:80,OPL:80,OPSR:400,OPSEC:1000,OPAA:2000,OPBT:500,OPX:3000,OPM:8000};
 function mcp60Read(){try{const d=JSON.parse(store.get(MCP60_KEY));if(d&&d.v===1&&Number.isSafeInteger(d.units)&&d.units>=0&&typeof d.lastDay==='string')return d;}catch(e){}return {v:1,units:0,lastDay:''};}
 let mcp60Wallet=mcp60Read();
 function mcp60Day(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
