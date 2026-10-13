@@ -10,7 +10,7 @@ Projekt: README.md; verbindliche Arbeitsregeln: AGENTS.md. -->
 <meta name="application-name" content="Monster Cards Pocket">
 <meta name="description" content="Monster Cards Pocket – Packs öffnen und Karten sammeln in fünf Kartenwelten.">
 <meta name="mcp-version" content="v1.3.2">
-<meta name="mcp-release-date" content="2026-10-12">
+<meta name="mcp-release-date" content="2026-10-13">
 <!-- MCP-GITHUB-INFO:END -->
 
 <meta charset="utf-8"/>
@@ -1032,6 +1032,10 @@ body.m-start .stats>.mcp-only{display:none!important}
 .lc-foil-v2.tier-7 .lc-finish{background-image:linear-gradient(115deg,transparent 0% 36%,#bea66966 43%,#e7d59b77 49%,#c1aa7466 56%,transparent 64% 100%);background-size:220% 220%;mix-blend-mode:color}
 .lc-foil-v2.tier-6 .lc-beam{background-image:linear-gradient(115deg,#15263c44 7%,transparent 29%,#dce7ed44 43%,#f1edf077 49%,#dce5df44 57%,transparent 74%,#17283a44 93%);background-size:180% 180%}
 .lc-foil-v2.tier-7 .lc-beam{background-image:linear-gradient(115deg,#28261e55 9%,transparent 29%,#e7deca55 43%,#f7f1df88 49%,#dfd4bd33 57%,transparent 74%,#2c272144 91%);background-size:180% 180%}
+.lc-foil-v2.tier-4{--foil:.32;--shine:.28;--beam:.41;--structure:.10;--spectrum:linear-gradient(115deg,#7d827d 0%,#b8aa87 24%,#d5c4a0 46%,#a89c86 64%,#83958e 83%,#a9a28d 100%)}
+.lc-foil-v2.tier-4 .lc-beam{background-image:linear-gradient(115deg,#302b2255 9%,transparent 29%,#eee3ce44 43%,#f6ecd988 49%,#dfd1b733 57%,transparent 74%,#30291e44 91%);background-size:180% 180%}
+.lc-foil-v2.tier-4 .lc-specular{background-image:linear-gradient(115deg,transparent 43%,#e7d6a933 46%,#fff0ca99 48%,#fff9e5 49%,#e1cda644 51%,transparent 54%)}
+.lc-foil-v2.tier-4 .lc-g3,.lc-foil-v2.tier-4 .lc-g4{display:none}
 @media(prefers-reduced-motion:reduce){.lc-foil-v2{transform:none}
 }
 @media(prefers-reduced-motion:reduce){.lc-foil-v2{scroll-behavior:auto}
@@ -1041,6 +1045,228 @@ body.m-start .stats>.mcp-only{display:none!important}
 .lc-foil-v2.lc-miss,.lc-foil-v2.grayed{transform:none}
 #stage .lc-foil-v2.lc-revealed{box-shadow:0 12px 25px #0009,0 0 26px var(--lc-hit-color,#d5c2f6)}
 @media(prefers-reduced-motion:reduce){.lc-foil-v2{transform:none!important}}
+</style>
+<style id="set-picker-style">
+.set-picker-native{display:none!important}
+.set-picker-trigger{display:flex;align-items:center;justify-content:space-between;gap:16px;max-width:100%;min-height:46px;padding:9px 14px;border:1px solid var(--gold,#dbbd79);border-radius:12px;background:var(--bg1);color:var(--txt);font:inherit;text-align:left;cursor:pointer}
+.set-picker-trigger span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.set-picker-trigger b{white-space:nowrap;font-size:12px;color:var(--gold,#dbbd79)}
+#setPicker{color:#f5f0e6;background:#181b28;border:1px solid #aa9364;border-radius:20px;padding:0;width:min(920px,calc(100vw - 32px));max-width:100%;height:min(820px,90dvh);max-height:90dvh;overflow:hidden;box-shadow:0 20px 80px #0008}
+#setPicker::backdrop{background:#090d18b8;backdrop-filter:blur(4px)}
+#setPicker .sp-shell{display:flex;flex-direction:column;height:100%;min-height:0}
+#setPicker .sp-head{padding:20px 22px 14px;border-bottom:1px solid #ffffff20;flex-shrink:0}
+#setPicker .sp-title-row{display:flex;justify-content:space-between;align-items:start;gap:12px}#setPicker h2{margin:0 0 5px;font-size:23px}#setPicker p{margin:0;color:#bbbfd1;font-size:13px}
+#setPicker button,#setPicker input,#setPicker select{font:inherit}#setPicker .sp-close{border:1px solid #ffffff30;background:#ffffff0a;color:#fff;border-radius:10px;min-width:44px;min-height:44px;cursor:pointer}
+#setPicker .sp-tools{display:flex;gap:10px;margin-top:16px}#setPicker input,#setPicker select{min-width:0;color:#f5f0e6;background:#242838;border:1px solid #ffffff30;border-radius:10px;padding:12px}#setPicker input{flex:1;width:100%}#setPicker select{max-width:40%}
+#setPicker .sp-content{overflow:auto;padding:18px 22px 26px;min-height:0;flex:1;overscroll-behavior:contain}#setPicker h3{font-size:15px;margin:22px 0 12px;color:#ecd09b}#setPicker h3:first-child{margin-top:0}
+#setPicker .sp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+#setPicker .sp-tile{display:flex;flex-direction:column;align-items:stretch;min-width:0;position:relative;padding:12px;text-align:left;background:#242735;color:#f5f0e6;border:1px solid #ffffff23;border-radius:14px;cursor:pointer;transition:border-color .15s,background .15s}
+#setPicker .sp-tile:hover{background:#2e3140;border-color:#e9c988}#setPicker .sp-tile[aria-current="true"]{border:2px solid #ebc779;padding:11px}#setPicker .sp-art{height:116px;display:grid;place-items:center;margin-bottom:12px;background:radial-gradient(ellipse,#b69b6430,transparent 70%);border-radius:8px}#setPicker .sp-art img{max-width:100%;max-height:116px;object-fit:contain}#setPicker .sp-fallback{font-size:20px;font-weight:800;color:#e5c589;border:1px solid #d5b773;border-radius:8px;padding:12px}
+#setPicker .sp-name{font-weight:700;font-size:14px;line-height:1.35;min-height:38px}#setPicker .sp-id{font-size:11px;color:#b6bdce;margin:5px 0 12px}#setPicker .sp-progress{margin-top:auto;font-size:12px}#setPicker .sp-numbers{display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap}#setPicker .sp-track{display:block;height:5px;background:#ffffff17;border-radius:8px;margin-top:8px;overflow:hidden}#setPicker .sp-track i{height:100%;display:block;background:#ebc779;border-radius:8px}#setPicker .sp-pending{color:#b6bdce;font-size:11px;line-height:1.4;margin-top:auto}
+#setPicker button:focus-visible,#setPicker input:focus-visible,#setPicker select:focus-visible{outline:2px solid #ffe0a0;outline-offset:3px}#setPicker .sp-status{padding:20px 0;color:#c7cbd8}
+@media(max-width:650px){#setPicker{width:calc(100vw - 16px);height:94dvh;max-height:94dvh;border-radius:16px}#setPicker .sp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}#setPicker .sp-head{padding:16px}#setPicker .sp-content{padding:16px}#setPicker .sp-tools{flex-wrap:wrap}#setPicker select{max-width:100%;width:100%}#setPicker .sp-art,#setPicker .sp-art img{height:100px;max-height:100px}.set-picker-trigger{width:100%}}
+
+</style>
+<style id="app-details-style">
+.model-native[hidden],.gift-panel[hidden]{display:none!important}
+.model-info{padding:8px 10px;text-align:left;line-height:1.6}
+.model-info h4{font-size:13px;margin:18px 0 6px}.model-info p{margin:6px 0 10px}.model-info ul{padding-left:20px}.model-info details{border-top:1px solid #ffffff20;padding:6px 0}.model-info details summary{text-align:left;font-weight:600}.model-info .rate-table{width:100%}.model-info .rate-table th:last-child,.model-info .rate-table td:last-child{text-align:right;white-space:nowrap}
+.lc-card .album-missing-label{position:absolute;left:5%;right:5%;bottom:4%;z-index:8;width:auto;background:#a5a6b9ed;color:#171d2b;border-radius:7px;padding:8px 6px;text-align:center;line-height:1.25;pointer-events:none}
+.album-missing-label .album-missing-number{display:block;font-style:normal;font-size:10px;opacity:.85}.album-missing-label b{display:block;font-size:12px;font-weight:800;overflow-wrap:anywhere}.album-missing-label small{display:block;font-size:10px;margin-top:4px;font-weight:700}
+.lc-miss .lc-badge,.grayed .lc-badge{display:none}
+@media(max-width:450px){.album-missing-label b{font-size:10px}.album-missing-label .album-missing-number,.album-missing-label small{font-size:9px}.lc-card .album-missing-label{padding:6px 4px}}
+
+</style>
+<style id="app-theme-style">
+/* Booster markup, .pack and its descendants deliberately retain the released styles. */
+/* Direction B: luminous ink, stronger world colors, restrained continuous atmosphere. */
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op){background:radial-gradient(ellipse at 10% 12%,#20799055,transparent 48%),radial-gradient(ellipse at 90% 60%,#8141bb52,transparent 52%),radial-gradient(ellipse at 45% 100%,#172948,transparent 65%),#0b1222 fixed}
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) header{background:#101b31d9;border-color:#85b4e029;box-shadow:0 4px 30px #0002;padding:16px 24px;backdrop-filter:blur(16px)}
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) .logo{font-family:'Segoe UI',sans-serif;font-weight:700;letter-spacing:-.025em;font-size:24px;background:linear-gradient(110deg,#d4f9fb,#ebdcff);background-clip:text;-webkit-background-clip:text;color:transparent}
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) .logo small{font-weight:500;letter-spacing:.3em;-webkit-text-fill-color:#9db3d5;color:#9db3d5;margin-top:5px}
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) .modesw{background:#0c1832;border-color:#789bd533;padding:4px;border-radius:13px}
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) .modesw button{color:#abc4e3;padding:9px 12px;font-weight:600}
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) .modesw button.on{background:linear-gradient(110deg,#a7e7e2,#bda6e6);border-radius:9px;color:#17263b;box-shadow:0 3px 18px #8fd3e128}
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) :is(.iconbtn,#mcp60Open){background:#26395c88;border-color:#98bbdf3b;color:#e4f2ff;border-radius:11px}
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) nav{background:#0f1c31ea;backdrop-filter:blur(18px);padding:4px 16px;border-color:#739bc638}
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) nav button{color:#a0b5d6;border-radius:12px;font-weight:600;font-size:12px;padding:9px 0}
+body[data-app-design="worlds"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) nav button.active{background:linear-gradient(110deg,#70d5d119,#bd82f020);color:#dcfbf7;box-shadow:none}
+body[data-app-design="worlds"] #view-start{padding:48px 28px 34px}
+body[data-app-design="worlds"] #startTitle{font-size:clamp(36px,4.8vw,57px);font-weight:700;letter-spacing:-.055em;background:linear-gradient(110deg,#e0ffff,#e4cfff);background-clip:text;-webkit-background-clip:text;color:transparent}
+body[data-app-design="worlds"] .start-eyebrow{color:#89d9d6}body[data-app-design="worlds"] .start-heading>p:last-child{color:#a7bfda;font-size:15px}
+body[data-app-design="worlds"] .start-resume{background:radial-gradient(ellipse at 90% 25%,#9862dd48,transparent 58%),linear-gradient(110deg,#17434f,#24334d 65%);border-color:#91c6d454;border-radius:22px;padding:28px 32px;box-shadow:0 12px 60px #296d8720}
+body[data-app-design="worlds"] .start-resume::after{color:#a8f4ff12;font-size:220px;right:15%;top:-50px}
+body[data-app-design="worlds"] .start-resume h2{font-size:28px;color:#e0fafa;font-weight:600}body[data-app-design="worlds"] .start-tag{color:#87dfd4}
+body[data-app-design="worlds"] #startContinue{background:linear-gradient(110deg,#adefe1,#c8baf0);border:0;border-radius:11px;color:#1b2a42;box-shadow:0 6px 20px #81d9e221}
+body[data-app-design="worlds"] .start-world-heading{margin-top:38px}
+body[data-app-design="worlds"] .start-world{background:#182d438c;border-color:#9bc4e327;border-radius:18px;box-shadow:0 10px 30px #02091430}
+body[data-app-design="worlds"] .start-world-art{height:104px}body[data-app-design="worlds"] .start-world-art svg{width:62px;height:62px}
+body[data-app-design="worlds"] .start-world-body{padding:18px 16px}body[data-app-design="worlds"] .start-world-actions button{background:#45638635;border-color:#8fb9df35;border-radius:9px;color:#e3effd}body[data-app-design="worlds"] .start-world-actions button+button{background:transparent;color:#aec8e2}
+body[data-app-design="worlds"] .start-preference select{background:#172b45;border-color:#83a8d23d}
+body[data-app-design="worlds"].m-lc #view-lcpacks .dk-panel{background:radial-gradient(ellipse at 50% 40%,#3c8aa324,transparent 55%),linear-gradient(135deg,#102e43d9,#35234bd9);border-color:#98b7e54d;border-radius:22px;padding:20px;box-shadow:0 16px 55px #03112540}
+body[data-app-design="worlds"].m-lc #view-lcpacks .bigpack::before{background:radial-gradient(ellipse,#3cddd031,transparent 60%),radial-gradient(ellipse,#9f56ee22,transparent 70%)}
+body[data-app-design="worlds"].m-lc :is(#view-lcpacks,#view-lcalbum) :is(.or-bar,.albumbar,.setprog){background:#18344b80;border-color:#9abae234;border-radius:14px}
+body[data-app-design="worlds"].m-lc :is(#view-lcpacks,#view-lcalbum) :is(input,select,.smallbtn,.set-picker-trigger){background:#20354d;border-color:#8da4d452;color:#e6f2fc;border-radius:10px}
+body[data-app-design="worlds"].m-lc .set-picker-trigger b{color:#94e4dc}body[data-app-design="worlds"].m-lc #view-lcalbum{padding:22px}body[data-app-design="worlds"].m-lc #lcGrid{gap:18px;margin-top:20px}
+body[data-app-design="worlds"].m-lc #lcBar .bar>i{background:linear-gradient(90deg,#54c8c8,#b7a0ed)}
+body[data-app-design="worlds"].m-lc :is(#lcOpen,#lcOpen10){border-radius:13px;background:linear-gradient(110deg,#9ee9d6,#9dcbd9);color:#1e3140;box-shadow:0 4px 0 #407884;font-weight:700}body[data-app-design="worlds"].m-lc #lcOpen10{background:linear-gradient(110deg,#9478c5,#626cba);color:#eef4ff;box-shadow:0 4px 0 #454275}
+@media(prefers-reduced-motion:no-preference){body[data-app-design="worlds"] .start-resume::after{animation:design-breathe 9s ease-in-out infinite}body[data-app-design="worlds"].m-lc #view-lcpacks .bigpack::before{animation:design-breathe 11s ease-in-out infinite}@keyframes design-breathe{50%{opacity:.55;transform:translateY(8px)}}}
+
+.design-tone-toggle{min-height:38px;padding:8px 12px;background:#213652;border:1px solid #88a8cd50;border-radius:11px;color:#e8f2ff;font:600 12px 'Segoe UI',sans-serif;cursor:pointer;white-space:nowrap}.design-tone-toggle[hidden]{display:none!important}.design-tone-toggle:focus-visible{outline:2px solid #83cbbd;outline-offset:3px}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op){background:radial-gradient(ellipse at 4% 5%,#ceeee9 0,transparent 48%),radial-gradient(ellipse at 97% 62%,#e7ddf4 0,transparent 55%),#f4f7f8 fixed}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) header{background:#f8fcfbdc;border-color:#9bb7bd40;box-shadow:0 3px 24px #32536309}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) .logo{background:linear-gradient(110deg,#245c64,#5a477e);background-clip:text;-webkit-background-clip:text;color:transparent}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) .logo small{-webkit-text-fill-color:#68818c;color:#68818c}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) .modesw{background:#eaf2f4;border-color:#a0bcc43b}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) .modesw button{color:#486471}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) .modesw button.on{background:linear-gradient(110deg,#caeae3,#ded3ed);color:#29475b;box-shadow:0 2px 9px #45657d0d}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) :is(.iconbtn,#mcp60Open,.design-tone-toggle){background:#edf4f4;border-color:#91aebd4d;color:#2f5362}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) #mcp60Balance{color:#315362}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) nav{background:#f8fbfbe8;border-color:#9ab4c23d;box-shadow:0 -3px 22px #2a466a06}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) nav button{color:#607d8b}
+body[data-app-design="worlds"][data-design-tone="light"]:is(.m-start,.m-lc,.m-mcp,.m-pocket,.m-live,.m-op) nav button.active{background:linear-gradient(110deg,#ceeae680,#ddd3ee70);color:#2e5863}
+body[data-app-design="worlds"][data-design-tone="light"] #view-start{color:#263f50}
+body[data-app-design="worlds"][data-design-tone="light"] #startTitle{background:linear-gradient(110deg,#234f58,#534373);background-clip:text;-webkit-background-clip:text;color:transparent}
+body[data-app-design="worlds"][data-design-tone="light"] .start-eyebrow{color:#477b7a}
+body[data-app-design="worlds"][data-design-tone="light"] .start-heading>p:last-child{color:#587482}
+body[data-app-design="worlds"][data-design-tone="light"] .start-resume{background:radial-gradient(ellipse at 90% 25%,#cab9e85c,transparent 60%),linear-gradient(110deg,#e0f0eb,#e6edf6 70%);border-color:#8aadb749;box-shadow:0 14px 42px #4060710c}
+body[data-app-design="worlds"][data-design-tone="light"] .start-resume::after{color:#638da311}
+body[data-app-design="worlds"][data-design-tone="light"] .start-resume h2{color:#294c59}
+body[data-app-design="worlds"][data-design-tone="light"] .start-resume p{color:#526e81}
+body[data-app-design="worlds"][data-design-tone="light"] .start-tag{color:#427c73}
+body[data-app-design="worlds"][data-design-tone="light"] #startContinue{background:linear-gradient(110deg,#356f73,#666795);color:#fff;box-shadow:0 5px 14px #4c7b7a23}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-heading h2{color:#294858}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-heading>span{color:#66808f}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world{background:#ffffffb8;border-color:#96b2c033;box-shadow:0 8px 30px #506d8e0b}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-art{background:radial-gradient(ellipse at 50% 10%,#e7d5ed,transparent 80%),#e7e8f3}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-art svg{color:#7d6495;filter:none}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-art::before,body[data-app-design="worlds"][data-design-tone="light"] .start-world-art::after{border-color:#608d9e15}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-pocket .start-world-art{background:linear-gradient(135deg,#e3f0db,#d6ede5)}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-pocket .start-world-art svg{color:#578276}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-live .start-world-art{background:linear-gradient(135deg,#d4e8f4,#dbddf0)}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-live .start-world-art svg{color:#5a79a2}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-lc .start-world-art{background:linear-gradient(135deg,#e5d9f2,#d9e7f2)}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-lc .start-world-art svg{color:#80709f}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-op .start-world-art{background:linear-gradient(135deg,#d6e9e8,#ebe5d8)}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-op .start-world-art svg{color:#88754d}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world h3{color:#2c4959}
+body[data-app-design="worlds"][data-design-tone="light"] :is(.start-world-body>p,.start-world-set,.start-progress-note){color:#65808a}
+body[data-app-design="worlds"][data-design-tone="light"] .start-progress-label{color:#5b7783}
+body[data-app-design="worlds"][data-design-tone="light"] .start-progress-label b{color:#315766}
+body[data-app-design="worlds"][data-design-tone="light"] .start-progress-track{background:#628ba618}
+body[data-app-design="worlds"][data-design-tone="light"] .start-progress{--progress-color:#7a9b9b}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-lc .start-progress{--progress-color:#9b8cbe}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-live .start-progress{--progress-color:#769fc6}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-actions button{background:#eaf2f3;border-color:#b0c5cd80;color:#3b6070}
+body[data-app-design="worlds"][data-design-tone="light"] .start-world-actions button+button{background:transparent;color:#66818c}
+body[data-app-design="worlds"][data-design-tone="light"] :is(.start-notes,.start-preference){border-color:#91adb533}
+body[data-app-design="worlds"][data-design-tone="light"] :is(.start-note-heading h2,.start-notes strong,.start-preference label){color:#3a5d6b}
+body[data-app-design="worlds"][data-design-tone="light"] :is(.start-notes ul,.start-preference p,#startPreferenceStatus,.start-note-heading>span){color:#68808e}
+body[data-app-design="worlds"][data-design-tone="light"] .start-preference select{background:#f2f7f8;border-color:#a4bdc46b;color:#456a79}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc #view-lcpacks .dk-panel{background:radial-gradient(ellipse at 30% 40%,#d9f0ea88,transparent 70%),linear-gradient(130deg,#ffffffd9,#ebe6f4bf);border-color:#9aaec846;box-shadow:0 16px 45px #4871850d}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc #view-lcpacks .dk-panel::before{background:linear-gradient(90deg,transparent,#9bb1c880,transparent)}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc #view-lcpacks .bigpack::before{background:radial-gradient(ellipse,#8bbbb72e,transparent 65%),radial-gradient(ellipse,#b59bd42b,transparent 70%)}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc :is(#view-lcpacks,#view-lcalbum) :is(.or-bar,.albumbar,.setprog){background:#ffffff94;border-color:#a3b9c745;color:#4b6a78}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc :is(#view-lcpacks,#view-lcalbum) :is(input,select,.smallbtn,.set-picker-trigger){background:#f2f7f9;border-color:#9db6c468;color:#355866}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc :is(#view-lcpacks,#view-lcalbum) select option{background:#f2f7f9;color:#355866}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc #view-lcalbum input::placeholder{color:#748c96}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc .set-picker-trigger b{color:#507d84}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc :is(#view-lcpacks,#view-lcalbum) :is(.sub,.infobox,.setprog,#lcProg){color:#587989}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc :is(#view-lcpacks,#view-lcalbum) :is(.infobox summary,.setprog b){color:#3b6471}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc :is(#view-lcpacks,#view-lcalbum) a{color:#376c89}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc #lcBar .bar{background:#74909d20}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc #lcBar .bar>i{background:linear-gradient(90deg,#6aada7,#b6a1cf)}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc .premium-entry small{color:#658190}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc :is(#lcOpen,#lcOpen10){background:linear-gradient(110deg,#427b7c,#62939c);color:#fff;box-shadow:0 4px 0 #355f69}
+body[data-app-design="worlds"][data-design-tone="light"].m-lc #lcOpen10{background:linear-gradient(110deg,#8771a7,#6e7fa8);box-shadow:0 4px 0 #59678c}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#setPicker,#premiumDialog,#versionHistoryDialog,#mcp60InfoDialog){background:#f7fafc;color:#355364;border-color:#a0b9c854}
+body[data-app-design="worlds"][data-design-tone="light"] #setPicker .sp-head{border-color:#b3c4d44b}
+body[data-app-design="worlds"][data-design-tone="light"] #setPicker :is(input,select,.sp-close){background:#eaf1f6;border-color:#a5b7cb60;color:#355364}
+body[data-app-design="worlds"][data-design-tone="light"] #setPicker :is(p,.sp-id,.sp-pending,.sp-status){color:#698095}
+body[data-app-design="worlds"][data-design-tone="light"] #setPicker h3{color:#466d80}
+body[data-app-design="worlds"][data-design-tone="light"] #setPicker .sp-tile{background:#edf2f7;color:#355364;border-color:#a6bacb45}
+body[data-app-design="worlds"][data-design-tone="light"] #setPicker .sp-tile[aria-current="true"]{border-color:#7b9fa8}
+body[data-app-design="worlds"][data-design-tone="light"] #setPicker .sp-fallback{color:#607395;border-color:#8198b877}
+body[data-app-design="worlds"][data-design-tone="light"] #setPicker .sp-art{background:radial-gradient(ellipse,#cbdee95a,transparent 70%)}
+body[data-app-design="worlds"][data-design-tone="light"] #setPicker .sp-track{background:#8ba3b026}
+body[data-app-design="worlds"][data-design-tone="light"] #setPicker .sp-track i{background:#8eabc1}
+@media(max-width:650px){.design-tone-toggle{min-width:38px;padding:8px;font-size:17px}.design-tone-toggle span{display:none}}
+
+/* Shared surfaces; each world has its own ambient colors. None of these variables are used by boosters. */
+body[data-app-design="worlds"]{--design-a:#cdeee8;--design-b:#e6dcf4;--design-ink:#355968;--design-dark-a:#236c7850;--design-dark-b:#754c9d50}
+body[data-app-design="worlds"].m-mcp{--design-a:#f5dfeb;--design-b:#e5def7;--design-ink:#77516c;--design-dark-a:#923c6855;--design-dark-b:#654aa65a}
+body[data-app-design="worlds"].m-pocket{--design-a:#dcf0df;--design-b:#f3e9d6;--design-ink:#3c7060;--design-dark-a:#29705955;--design-dark-b:#78644738}
+body[data-app-design="worlds"].m-live{--design-a:#d4ecf6;--design-b:#e0e4fa;--design-ink:#3c6588;--design-dark-a:#216e9b5a;--design-dark-b:#4c599b50}
+body[data-app-design="worlds"].m-op{--design-a:#d5eaea;--design-b:#f0e4d1;--design-ink:#446c73;--design-dark-a:#236f7a55;--design-dark-b:#97783e38}
+body[data-app-design="worlds"].m-start{--design-a:#cdeee8;--design-b:#e6dcf4;--design-ink:#355968;--design-dark-a:#236c7850;--design-dark-b:#754c9d50}
+body[data-app-design="worlds"][data-design-tone="light"]{background:radial-gradient(ellipse at 4% 5%,var(--design-a),transparent 48%),radial-gradient(ellipse at 97% 62%,var(--design-b),transparent 55%),#f4f7f8 fixed!important}
+body[data-app-design="worlds"][data-design-tone="dark"]{background:radial-gradient(ellipse at 10% 12%,var(--design-dark-a),transparent 48%),radial-gradient(ellipse at 90% 60%,var(--design-dark-b),transparent 52%),#0b1222 fixed!important}
+body[data-app-design="worlds"] :is(#view-packs,#view-orig,#view-live,#view-oppacks) .dk-panel{background:linear-gradient(135deg,#132c40d9,#252841d9);border-color:#9fb9d345;border-radius:22px;padding:20px;box-shadow:0 15px 42px #00112722}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#view-packs,#view-orig,#view-live,#view-oppacks) .dk-panel{background:linear-gradient(135deg,#ffffffcf,#f2f6fabf);border-color:#9fb5c344;box-shadow:0 15px 42px #496c840d}
+body[data-app-design="worlds"] :is(#view-orig,#view-live) .dk-panel::before{background:linear-gradient(110deg,#64bdc526,#b493de20);opacity:.45}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#view-orig,#view-live) .dk-panel::before{background:linear-gradient(110deg,var(--design-a),var(--design-b));opacity:.3}
+body[data-app-design="worlds"] :is(#view-orig,#view-live,#view-oppacks,#view-origalbum,#view-livealbum,#view-opalbum,#view-album) :is(.or-bar,.albumbar,.setprog){background:#1a3047a3;border-color:#92b1cb38;border-radius:14px;color:#bfd4e5}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#view-orig,#view-live,#view-oppacks,#view-origalbum,#view-livealbum,#view-opalbum,#view-album) :is(.or-bar,.albumbar,.setprog){background:#ffffff96;border-color:#a1bac83b;color:#547889}
+body[data-app-design="worlds"] :is(#view-packs,#view-album,#view-orig,#view-live,#view-oppacks,#view-origalbum,#view-livealbum,#view-opalbum) :is(input,select,.smallbtn,.set-picker-trigger){background:#20354d;border-color:#94b4d44f;color:#e4edf8;border-radius:10px}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#view-packs,#view-album,#view-orig,#view-live,#view-oppacks,#view-origalbum,#view-livealbum,#view-opalbum) :is(input,select,.smallbtn,.set-picker-trigger){background:#f4f8fa;border-color:#9db5c55c;color:var(--design-ink)}
+body[data-app-design="worlds"] :is(#view-orig,#view-live,#view-oppacks,#view-origalbum,#view-livealbum,#view-opalbum) select option{background:#20354d;color:#e4edf8}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#view-orig,#view-live,#view-oppacks,#view-origalbum,#view-livealbum,#view-opalbum) select option{background:#f4f8fa;color:var(--design-ink)}
+body[data-app-design="worlds"] :is(#view-packs,#view-album,#view-orig,#view-live,#view-oppacks,#view-origalbum,#view-livealbum,#view-opalbum) :is(.sub,.infobox,.orStatus,.setprog,.mcp-set-status,.setprog b,.statsrow){color:#b4cce2}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#view-packs,#view-album,#view-orig,#view-live,#view-oppacks,#view-origalbum,#view-livealbum,#view-opalbum) :is(.sub,.infobox,.orStatus,.setprog,.mcp-set-status,.setprog b,.statsrow){color:#58798b}
+body[data-app-design="worlds"] :is(#view-packs,#view-orig,#view-live,#view-oppacks) :is(.infobox summary,.or-note,.model-info){color:#bdd7e9}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#view-packs,#view-orig,#view-live,#view-oppacks) :is(.infobox summary,.or-note,.model-info){color:var(--design-ink)}
+body[data-app-design="worlds"] :is(#view-packs,#view-album,#view-orig,#view-live,#view-oppacks,#view-origalbum,#view-livealbum,#view-opalbum) .set-picker-trigger b{color:#95dbd8}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#view-packs,#view-album,#view-orig,#view-live,#view-oppacks,#view-origalbum,#view-livealbum,#view-opalbum) .set-picker-trigger b{color:var(--design-ink)}
+body[data-app-design="worlds"] :is(#view-origalbum,#view-livealbum,#view-opalbum){padding:22px}
+body[data-app-design="worlds"] :is(#orGrid,#tlGrid,#opGrid){gap:18px;margin-top:20px}
+body[data-app-design="worlds"] #mcp60Balance{color:#dfedf8}
+body[data-app-design="worlds"][data-design-tone="light"] #mcp60Balance{color:var(--design-ink)}
+body[data-app-design="worlds"] :is(#orProg,#tlProg,#opProg,.premium-entry small){color:#a8c3d8}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#orProg,#tlProg,#opProg,.premium-entry small){color:#66828f}
+body[data-app-design="worlds"] :is(#btnOpen,#orOpen,#tlOpen,#opOpen){border-radius:13px;background:linear-gradient(110deg,#9de5d5,#9ccadf);color:#1a3545;box-shadow:0 4px 0 #467583}
+body[data-app-design="worlds"] :is(#btnOpen10,#orOpen10,#tlOpen10,#opOpen10){border-radius:13px;background:linear-gradient(110deg,#a28acb,#7383c5);color:#f4f7ff;box-shadow:0 4px 0 #526195}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#btnOpen,#orOpen,#tlOpen,#opOpen){background:linear-gradient(110deg,#417d80,#6295a0);color:#fff;box-shadow:0 4px 0 #3a6972}
+body[data-app-design="worlds"][data-design-tone="light"] :is(#btnOpen10,#orOpen10,#tlOpen10,#opOpen10){background:linear-gradient(110deg,#8d79ad,#7889b4);color:#fff;box-shadow:0 4px 0 #61729d}
+.design-world-trigger{display:none}
+#designWorldDialog{background:#132339;color:#e8f0fa;border:1px solid #789abf55;border-radius:20px;padding:20px;width:min(480px,calc(100vw - 24px));max-height:88dvh;overflow:auto;box-shadow:0 22px 70px #00101b66}
+#designWorldDialog::backdrop{background:#0b1727a8;backdrop-filter:blur(5px)}
+#designWorldDialog .dw-head{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:18px}
+#designWorldDialog h2{font:700 21px 'Segoe UI',sans-serif;margin:0}
+#designWorldDialog .dw-close{border:1px solid #92acc04d;border-radius:10px;min-height:44px;min-width:44px;background:transparent;color:inherit;font-size:20px;cursor:pointer}
+#designWorldDialog .dw-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+#designWorldDialog .dw-choice{font:600 13px 'Segoe UI',sans-serif;background:#1c334d;color:#dfeaf8;border:1px solid #93b3cf38;border-radius:14px;min-height:94px;padding:14px 9px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;text-align:center;cursor:pointer}
+#designWorldDialog .dw-choice svg{width:32px;height:32px;color:#9dcfcf}
+#designWorldDialog .dw-choice:last-child{grid-column:1/-1;min-height:74px;flex-direction:row}
+#designWorldDialog .dw-choice[aria-current="true"]{border:2px solid #a5d9d5;background:#254353}
+#designWorldDialog button:focus-visible{outline:2px solid #92d8d1;outline-offset:3px}
+body[data-design-tone="light"] #designWorldDialog{background:#f7fbfc;color:#355968;border-color:#a4bac852}
+body[data-design-tone="light"] #designWorldDialog .dw-choice{background:#eaf2f6;color:#3d6173;border-color:#a6bec84d}
+body[data-design-tone="light"] #designWorldDialog .dw-choice[aria-current="true"]{background:#dcefe9;border-color:#7aa7a6}
+body[data-design-tone="light"] #designWorldDialog .dw-choice svg{color:#6a91a2}
+@media(max-width:650px){body[data-app-design="worlds"] #modeSw{display:none!important}body[data-app-design="worlds"] .design-world-trigger{display:flex;align-items:center;justify-content:space-between;gap:10px;order:20;flex:0 0 100%;width:100%;min-height:46px;padding:10px 13px;border-radius:12px;background:#20354d;border:1px solid #90b0cb48;color:#dcebf9;font:600 13px 'Segoe UI',sans-serif;text-align:left;cursor:pointer}body[data-app-design="worlds"][data-design-tone="light"] .design-world-trigger{background:#edf5f6;color:#355968;border-color:#a5bec654}.design-world-trigger small{font-size:10px;opacity:.8;white-space:nowrap}body[data-app-design="worlds"] :is(#view-origalbum,#view-livealbum,#view-opalbum){padding:14px}body[data-app-design="worlds"] :is(#orGrid,#tlGrid,#opGrid){gap:10px}}
+
+body[data-app-design="worlds"].m-live #view-live .bigpack::before{left:18%;right:18%;top:12%;bottom:7%;height:auto;border:0;border-radius:50%;box-shadow:none;background:radial-gradient(ellipse,#55b8d522,transparent 65%)}
+body[data-app-design="worlds"][data-design-tone="light"].m-live #view-live .bigpack::before{background:radial-gradient(ellipse,#8db5d629,transparent 65%)}
+
+@media(max-width:650px){body[data-app-design="worlds"] header{padding:12px 14px}body[data-app-design="worlds"] #view-start{padding:30px 16px 24px}body[data-app-design="worlds"] .start-resume{padding:22px}body[data-app-design="worlds"] .start-resume h2{font-size:24px}body[data-app-design="worlds"] .start-world-body{padding:14px 12px}body[data-app-design="worlds"] .start-world-art{height:90px}body[data-app-design="worlds"] #view-lcalbum{padding:14px}body[data-app-design="worlds"] #lcGrid{gap:10px}body[data-app-design="worlds"] .logo{font-size:21px}}
+
+/* Monster Cards: readable header and album progress in both modes. */
+body[data-app-design="worlds"].m-mcp .stats .mcp-only{color:#c5dbea}
+body[data-app-design="worlds"][data-design-tone="light"].m-mcp .stats .mcp-only{color:#355968}
+body[data-app-design="worlds"].m-mcp header .prog .bar{background:#8eafc633}
+body[data-app-design="worlds"][data-design-tone="light"].m-mcp header .prog .bar{background:#7895a82b}
+body[data-app-design="worlds"].m-mcp header .prog .bar>i{background:linear-gradient(90deg,#65b9b0,#a595c9)}
+body[data-app-design="worlds"] #mcpProg{background:#1a3047a3;border:1px solid #92b1cb38;border-radius:14px;color:#bfd4e5;margin-bottom:8px}
+body[data-app-design="worlds"][data-design-tone="light"] #mcpProg{background:#ffffff96;border-color:#a1bac83b;color:#547889}
+body[data-app-design="worlds"][data-design-tone="light"] #mcpProg .bar{background:#7895a82b}
+body[data-app-design="worlds"] #mcpProg .bar>i{background:linear-gradient(90deg,#65b9b0,#a595c9)}
+body[data-app-design="worlds"] #mcpAlbumPacks{font-size:12px;color:#adc7d9;margin:0 0 16px}
+body[data-app-design="worlds"][data-design-tone="light"] #mcpAlbumPacks{color:#547889}
+
+/* Collection belongs in the album, not duplicated in the header. */
+header .stats>.mcp-only{display:none!important}
+#lcProg.lc-album-stats{display:flex;flex-wrap:wrap;gap:6px 10px;margin:8px 0 14px;font-size:12px}
+#lcProg.lc-album-stats>span{padding:4px 8px;border:1px solid #91acc130;border-radius:8px;background:#ffffff08;line-height:1.4}
+body[data-design-tone="light"] #lcProg.lc-album-stats>span{background:#ffffff80;border-color:#9bb2c33b}
 </style>
 </head>
 <body class="m-lc">
@@ -1063,7 +1289,7 @@ body.m-start .stats>.mcp-only{display:none!important}
   <div class="start-world-heading"><h2>Deine Kartenwelten</h2><span>Fortschritt je Set · jede Druckversion zählt</span></div>
   <div id="startWorlds" class="start-worlds"></div>
   <div class="start-bottom">
-   <section class="start-notes" aria-labelledby="startNotesTitle"><div class="start-note-heading"><h2 id="startNotesTitle">Zuletzt neu · v1.3.2</h2><span>12. Oktober 2026</span></div><ul><li><strong>Lorcana-Foil neu gestaltet</strong> – Durchgängiger Foil für Episch, Mythisch, Verzaubert und Ikonisch – mit beweglichen Reflexen und erhaltenen Originalfarben bei den höchsten Seltenheiten.</li><li><strong>Premium-Displays</strong> – Garantierte Mindesttreffer für Pokémon TCG Live, Lorcana und One Piece.</li><li><strong>Alle Neuerungen im Überblick</strong> – Öffne die Versionsübersicht für Opening-Filter, neue Karten, God Packs, mobilen Tausch und das Token-Geschenk.</li></ul><button type="button" class="start-history-button" id="versionHistoryOpen" aria-haspopup="dialog" aria-controls="versionHistoryDialog">Alle Neuerungen ansehen <span class="release-new" id="versionHistoryNew">Neu</span></button></section>
+   <section class="start-notes" aria-labelledby="startNotesTitle"><div class="start-note-heading"><h2 id="startNotesTitle">Zuletzt neu · v1.3.2</h2><span>13. Oktober 2026</span></div><ul><li><strong>Neue Kartenwelten mit Hell- und Dunkelmodus</strong> – Helle Gestaltung mit eigenen Farben je TCG. Der Mond-/Sonnenbutton speichert deinen Modus; auf Handys erreichst du alle TCGs über „Kartenwelt wechseln“. Sammlung und geöffnete Packs stehen im Album; Lorcana zeigt Fortschritt je Seltenheit wie Pokémon.</li><li><strong>Set-Auswahl ohne automatische Tastatur</strong> – Auf Handys und Touch-Geräten öffnet sich die Set-Übersicht ohne Suchfokus. Die Tastatur erscheint erst nach Antippen der Suche; am Desktop bleibt sie direkt bereit.</li><li><strong>Klarere Alben und Pack-Infos</strong> – Einheitliche aktuelle Modellangaben in allen Kartenwelten. Fehlende Lorcana- und One-Piece-Karten zeigen Name und Seltenheit direkt auf der Karte; abgeholte Token-Geschenke verschwinden. Auf der Startseite heißt es in allen Kartenwelten „Karteneinträge gesammelt“. </li></ul><button type="button" class="start-history-button" id="versionHistoryOpen" aria-haspopup="dialog" aria-controls="versionHistoryDialog">Alle Neuerungen ansehen <span class="release-new" id="versionHistoryNew">Neu</span></button></section>
    <div class="start-preference"><label for="startDestination">Beim Start der App</label><select id="startDestination"><option value="home">Meine Kartenwelten anzeigen</option><option value="last">Im letzten Bereich fortsetzen</option></select><p>Du erreichst diese Seite jederzeit über „Start“.</p><span id="startPreferenceStatus" role="status"></span></div>
   </div>
  </div>
@@ -4648,6 +4874,33 @@ preload(list){ list.forEach(p => { if (p.card.imgs && p.card.imgs[0]){ const i =
 const api_ = {
 src, cfg,
 openingPool:pool,
+// Listing metadata and cached card IDs only: no preparation, migration or collection writes.
+async pickerSets(seriesId){
+ if(!seriesList)await loadSeriesList(false);
+ if(cfg.source){if(!sets)await loadSets(false);return sets.filter(s=>!s.parent).map(s=>({...s,group:seriesList?.find(x=>x.id===s.series)?.name||('Serie '+(s.series||''))}));}
+ const groups=seriesId?seriesList.filter(s=>s.id===seriesId):seriesList||[];
+ const lists=await Promise.all(groups.map(async group=>{
+  let c=getCache(cfg.cache+'series_de_'+group.id);
+  if(!c?.sets){const d=await api('/series/'+encodeURIComponent(group.id));c={sets:(d.sets||[]).filter(cfg.setFilter).map(s=>({id:s.id,name:s.name,logo:s.logo||'',date:s.releaseDate||'',total:s.cardCount?.total||0,official:s.cardCount?.official||0}))};if(cfg.galleries)linkGalleries(c.sets);store.set(cfg.cache+'series_de_'+group.id,JSON.stringify(c));}
+  return c.sets.filter(s=>!s.parent).map(s=>({...s,series:group.id,group:group.name}));
+ }));return lists.flat();
+},
+pickerProgress(meta){
+ const data=set?.id===meta.id?set:getCache(cfg.cache+'set_de_'+meta.id);
+ const owned=sv.sets[meta.id]?.owned||{};
+ const ids=data?.cards?.map(c=>c.id);
+ const total=ids?new Set(ids).size:0;
+ return {total,have:ids?[...new Set(ids)].filter(id=>Number(owned[id])>0).length:0,
+  image:cfg.cover?cfg.cover(data||{...meta,boosters:(meta.packs||[]).map(id=>({id}))},{booster:''}):meta.logo||data?.logo||'',
+  catalogTotal:meta.total||0};
+},
+async pickerSelect(meta){
+ if(loading||busy||phase!=='idle')return false;
+ if(sv.series!==meta.series&&meta.series){sv.series=meta.series;if(!cfg.source){sets=null;await loadSets(false);}}
+ sv.set=meta.id;sv.booster='';sfx.click();await switchSet();return true;
+},
+pickerCurrent(){return {id:sv.set,loading};},
+
 rewardContext(){ return set && !loading ? {key:cfg.key+':'+set.id, title:set.name, cards:set.cards.map(known), owned:setSave(set.id).owned, persist:persistX, refresh:render} : null; },
 get set(){ return set; },
 owns(c){ return !!set && setSave(set.id).owned[c.id] > 0; },
@@ -5695,7 +5948,7 @@ if(mcp60Locked||busy||!mcp60Pending)return;const p=mcp60Pending,ctx=mcp60Context
 mcp60Locked=true;try{mcp60Wallet=mcp60Read();if(mcp60Wallet.units>Number.MAX_SAFE_INTEGER-p.units){dkToast('Guthaben zu groß.');return;}for(const x of p.items)ctx.owned[x.id]-=x.n;if(p.target)ctx.owned[p.target.id]=1;ctx.persist();mcp60Wallet.units+=p.units;mcp60Write();ctx.refresh();mcp60Render();dkToast('Tausch abgeschlossen.');}finally{mcp60Locked=false;}
 }
 function mcp60Init(){
-const style=document.createElement('style');style.textContent='#mcp60Bar{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;padding:8px}.mcp60wallet{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}.mcp60coin{width:24px;height:24px;flex:0 0 24px;display:inline-grid;place-items:center;border:2px solid #5f3b00;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3a8 0 7%,#ffd84a 8% 35%,#e9a600 64%,#9b6100 100%);box-shadow:inset 0 0 0 2px #ffed83,0 1px 2px #0008;color:#5b3600;font-size:15px;line-height:1}.mcp60coin::before{content:"▰";transform:rotate(-8deg);font-weight:900;text-shadow:0 1px #ffe77a}.mcp60value{font-variant-numeric:tabular-nums}#mcp60Dialog{color:var(--txt);background:var(--bg1);border:1px solid var(--gold);border-radius:16px;width:min(720px,94vw);max-height:90dvh;padding:18px}#mcp60Dialog::backdrop{background:#000a}#mcp60Dialog button,#mcp60Dialog input,#mcp60Dialog select{font:inherit;padding:8px;border-radius:8px}#mcp60Dialog input,#mcp60Dialog select{max-width:100%;color:#111;background:#fff}#mcp60List{max-height:35dvh;overflow:auto;margin:12px 0}.mcp60row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid #ffffff25}.mcp60row input{width:75px;flex-shrink:0}#mcp60Preview{white-space:pre-wrap;max-height:20dvh;overflow:auto}#mcp60Dialog .actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}';document.head.append(style);
+const style=document.createElement('style');style.textContent='#mcp60Bar{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap;padding:8px}.mcp60wallet{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}.mcp60coin{width:24px;height:24px;flex:0 0 24px;display:inline-grid;place-items:center;border:2px solid #5f3b00;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff3a8 0 7%,#ffd84a 8% 35%,#e9a600 64%,#9b6100 100%);box-shadow:inset 0 0 0 2px #ffed83,0 1px 2px #0008;color:#5b3600;font-size:15px;line-height:1}.mcp60coin::before{content:"";box-sizing:border-box;width:10px;height:13px;border:1.5px solid #fff4bd;border-radius:2px;transform:rotate(-8deg);background:linear-gradient(to bottom,transparent 0 2px,#fff4bd 2px 3px,transparent 3px 8px,#fff4bd 8px 9px,transparent 9px);box-shadow:0 1px 2px #81500055}.mcp60value{font-variant-numeric:tabular-nums}#mcp60Dialog{color:var(--txt);background:var(--bg1);border:1px solid var(--gold);border-radius:16px;width:min(720px,94vw);max-height:90dvh;padding:18px}#mcp60Dialog::backdrop{background:#000a}#mcp60Dialog button,#mcp60Dialog input,#mcp60Dialog select{font:inherit;padding:8px;border-radius:8px}#mcp60Dialog input,#mcp60Dialog select{max-width:100%;color:#111;background:#fff}#mcp60List{max-height:35dvh;overflow:auto;margin:12px 0}.mcp60row{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:8px;border-bottom:1px solid #ffffff25}.mcp60row input{width:75px;flex-shrink:0}#mcp60Preview{white-space:pre-wrap;max-height:20dvh;overflow:auto}#mcp60Dialog .actions{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}';document.head.append(style);
 const bar=document.createElement('div');bar.id='mcp60Bar';bar.innerHTML='<button type="button" id="mcp60Balance" class="mcp60wallet" aria-label="Pack-Token-Guthaben und Informationen öffnen" aria-haspopup="dialog" aria-controls="mcp60InfoDialog"><span class="mcp60coin" aria-hidden="true"></span><span class="mcp60value"></span></button><button type="button" class="smallbtn" id="mcp60Open">Doppelte tauschen</button>';document.getElementById('modeSw').insertAdjacentElement('afterend',bar);
 // Gezielte Erweiterung: kompaktes, responsives Pack-Token-Infofenster.
 const infoStyle=document.createElement('style');
@@ -5901,7 +6154,7 @@ function startCollection(m){
  else if(m==='op'){title=mcpSetName('op');ids=OP_POOL.map(c=>c.id);owned=opSave.owned;}
  else{const api=m==='pocket'?POCKET:LIVE,ctx=api.rewardContext();if(!ctx)return {title:api.set?.name||'Set wird geladen …',ready:false};title=ctx.title;ids=ctx.cards.map(c=>c.id);owned=ctx.owned;}
  const unique=[...new Set(ids)],have=unique.filter(id=>Number(owned[id])>0).length,total=unique.length;
- return {title,ready:total>0,have,total,percent:total?(have===total?100:Math.min(99.9,Math.round(have/total*1000)/10)):0,note:m==='lc'?'Kartenmotive gesammelt':m==='op'?'Druckversionen einzeln':'Karteneinträge gesammelt'};
+ return {title,ready:total>0,have,total,percent:total?(have===total?100:Math.min(99.9,Math.round(have/total*1000)/10)):0,note:'Karteneinträge gesammelt'};
 }
 function startProgressHTML(data){
  if(!data.ready)return '<span class="start-progress-note">Setdaten werden geladen …</span>';
@@ -5938,7 +6191,7 @@ if(startState.destination==='last')startGo(startState.lastMode,startState.lastVi
 // One campaign claim per locally saved wallet; Berlin calendar dates.
 const giftCampaign={id:'thanks-2026-10',from:'2026-10-11',until:'2026-10-18',units:100000};
 function giftDay(){return new Intl.DateTimeFormat('sv-SE',{timeZone:'Europe/Berlin',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());}
-function giftRefresh(){const button=document.getElementById('giftClaim');if(!button)return;const wallet=mcp60Read(),claimed=wallet.gifts?.[giftCampaign.id]===true,day=giftDay();button.disabled=claimed||day<giftCampaign.from||day>giftCampaign.until;button.textContent=claimed?'100 Token erhalten':day>giftCampaign.until?'Aktion beendet':'100 Token abholen';}
+function giftRefresh(){const button=document.getElementById('giftClaim');if(!button)return;const wallet=mcp60Read(),claimed=wallet.gifts?.[giftCampaign.id]===true,day=giftDay();button.closest('.gift-panel').hidden=claimed;button.disabled=claimed||day<giftCampaign.from||day>giftCampaign.until;button.textContent=claimed?'100 Token erhalten':day>giftCampaign.until?'Aktion beendet':'100 Token abholen';}
 let tradeKind='tokens',tradeAmounts=new Map();
 function tradeSelected(){return [...tradeAmounts].filter(([,n])=>n>0);}
 function tradeSummary(){const ctx=mcp60Ctx;if(!ctx)return;const entries=tradeSelected(),count=entries.reduce((sum,[,n])=>sum+n,0),units=entries.reduce((sum,[id,n])=>sum+n*mcp60Value(ctx.cards.find(c=>String(c.id)===id)),0);document.getElementById('tradeTotal').textContent=tradeKind==='wish'?count+' von 4 Doppelten ausgewählt':count+' Karten → '+mcp60Format(units)+' Token';mcp60Clear();document.getElementById(tradeKind==='wish'?'mcp60Wish':'mcp60Tokens').disabled=!count||(tradeKind==='wish'&&count!==4);}
@@ -5975,8 +6228,8 @@ function premiumContext(){
 function premiumRule(label,n,test){return {label,n,test};}
 function premiumProfile(ctx){
  if(!ctx)return null;const has=r=>ctx.cards.some(c=>c.rar===r),label=r=>RARITIES[r]?.name||r;let rules=[],n=ctx.game==='live'?20:24;
- if(ctx.game==='lc')rules=[premiumRule(label('LC4'),4,c=>c.rar==='LC4'),premiumRule(label('LC5'),2,c=>c.rar==='LC5')];
- else if(ctx.game==='op'){if(ctx.setId==='prb01')n=20;rules=[premiumRule('Super Rare · Standard',4,c=>c.variant==='standard'&&c.rarity==='SR'),premiumRule('Secret Rare · Standard',1,c=>c.variant==='standard'&&c.rarity==='SEC'),premiumRule('Parallel',1,c=>c.variant==='parallel')];}
+ if(ctx.game==='lc'){rules=[premiumRule(label('LC4'),6,c=>c.rar==='LC4'),premiumRule(label('LC5'),4,c=>c.rar==='LC5'),premiumRule(label('LC6'),1,c=>c.rar==='LC6')];if(has('LC7'))rules.push(premiumRule(label('LC7'),1,c=>c.rar==='LC7'));}
+ else if(ctx.game==='op'){if(ctx.setId==='prb01')n=20;rules=[premiumRule('Super Rare · Standard',6,c=>c.variant==='standard'&&c.rarity==='SR'),premiumRule('Secret Rare · Standard',1,c=>c.variant==='standard'&&c.rarity==='SEC'),premiumRule('Alternate Art / Parallel',2,c=>c.variant==='parallel')];}
  else if(ctx.setId==='30th')rules=[premiumRule(label('T6'),4,c=>c.rar==='T6'),premiumRule(label('TC'),2,c=>c.rar==='TC'),premiumRule(label('T7'),1,c=>c.rar==='T7')];
  else if(ctx.setId==='cel25')rules=[premiumRule(label('TC'),4,c=>c.rar==='TC')];
  else if(has('T6')&&has('T7'))rules=[premiumRule(label('T6'),4,c=>c.rar==='T6'),premiumRule(label('T4'),2,c=>c.rar==='T4'),premiumRule(label('T7'),1,c=>c.rar==='T7')];
@@ -5987,7 +6240,7 @@ function premiumProfile(ctx){
   const high=sorted[0],mid=sorted.find(k=>k.id!==high?.id&&RANK[k.id]>=3);
   if(high)rules.push(premiumRule(high.label,1,c=>c.rar===high.id));if(mid)rules.push(premiumRule(mid.label,4,c=>c.rar===mid.id));
  }
- const missing=rules.filter(r=>!ctx.cards.some(r.test));return {key:ctx.key,game:ctx.game,title:ctx.title,n,cost:Math.ceil(n*1.25),rules,missing,available:rules.length>0&&!missing.length};
+ const missing=rules.filter(r=>!ctx.cards.some(r.test));return {key:ctx.key,game:ctx.game,title:ctx.title,n,cost:ctx.game==='lc'?40:Math.ceil(n*1.25),rules,missing,available:rules.length>0&&!missing.length};
 }
 const PREMIUM_PRB_MANGA=['OP01-016','OP01-120','OP02-013','OP03-122','OP04-083','OP05-069','OP05-074','OP05-119','OP06-118','EB01-006'];
 function premiumGodRecipe(ctx){
@@ -6043,6 +6296,7 @@ function premiumInit(){
  const observer=new MutationObserver(refreshEntry);for(const id of ['tlInfo','lcInfo','opInfo'])observer.observe($('#'+id),{childList:true,characterData:true,subtree:true});observer.observe(document.body,{attributes:true,attributeFilter:['class']});refreshEntry();
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',premiumInit,{once:true});else premiumInit();
+
 
 // Correct German display metadata without rewriting collection keys or quantities.
 function mcpLorcanaCorrectCatalog(id,cards){
@@ -6106,13 +6360,13 @@ document.addEventListener('pointerout',e=>{const el=e.target.closest?.('.lc-surf
 
 // Approved full-card foil. Presentation only: no collection or wallet access.
 function lcCardHTML(c,extra='',large=false){
- const supported=['LC4','LC7','LC6','LC8'].includes(c.rar),html=lcCardHTMLBase(c,extra,large);if(!supported)return html;
+ const supported=['LC4','LC5','LC7','LC6','LC8'].includes(c.rar),html=lcCardHTMLBase(c,extra,large);if(!supported)return html;
  const facets='<i class="lc-beam" aria-hidden="true"></i><i class="lc-specular" aria-hidden="true"></i><i class="lc-sparkles" aria-hidden="true"><span class="lc-glint lc-g1"></span><span class="lc-glint lc-g2"></span><span class="lc-glint lc-g3"></span><span class="lc-glint lc-g4"></span></i>';
  return html.replace('lc-surface tier-','lc-surface lc-foil-v2 tier-').replace('data-lc-card=',`data-lc-foil-rarity="${c.rar}" data-lc-card=`).replace(/<\/div>$/,()=>facets+'</div>');
 }
 function lcFoilReveal(flip){
  const el=flip?.querySelector('.lc-foil-v2');if(!el)return;
- el.style.setProperty('--lc-hit-color',({LC4:'#c9e9ff',LC7:'#d4b3ff',LC6:'#91eee0',LC8:'#ffdf92'})[el.dataset.lcFoilRarity]);el.classList.add('lc-revealed');
+ el.style.setProperty('--lc-hit-color',({LC4:'#c9e9ff',LC5:'#f8d387',LC7:'#d4b3ff',LC6:'#91eee0',LC8:'#ffdf92'})[el.dataset.lcFoilRarity]);el.classList.add('lc-revealed');
  if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;
  el.querySelector('.lc-specular')?.animate([{backgroundPosition:'0% 20%'},{backgroundPosition:'100% 80%'}],{delay:350,duration:1500,easing:'ease-in-out'});
 }
@@ -6132,6 +6386,170 @@ function lcFoilReveal(flip){
  reduced.addEventListener('change',()=>{if(reduced.matches){cancelAnimationFrame(frame);frame=0;for(const el of registered)el.querySelectorAll('.lc-specular').forEach(layer=>layer.getAnimations().forEach(a=>a.cancel()));}else schedule();});
  document.addEventListener('visibilitychange',()=>{if(document.hidden){cancelAnimationFrame(frame);frame=0;previousTime=0;}else schedule();});
 })();
+
+// Visual navigation. Existing selection methods retain ownership and pack-opening behavior.
+const spDialog=document.createElement('dialog');spDialog.id='setPicker';spDialog.setAttribute('aria-labelledby','spTitle');
+spDialog.innerHTML='<div class="sp-shell"><header class="sp-head"><div class="sp-title-row"><div><h2 id="spTitle">Set wechseln</h2><p id="spSubtitle"></p></div><button type="button" class="sp-close" aria-label="Set-Auswahl schließen">✕</button></div><div class="sp-tools"><input id="spSearch" type="search" placeholder="Setname oder Kürzel suchen" aria-label="Sets durchsuchen"><select id="spGroup" aria-label="Serie auswählen"><option value="">Alle Serien</option></select></div></header><div class="sp-content" id="spContent" aria-live="polite"></div></div>';
+document.body.append(spDialog);
+const spWorlds={or:{title:'Pokémon TCG Pocket',api:POCKET},tl:{title:'Pokémon TCG Live',api:LIVE},lc:{title:'Disney Lorcana'},op:{title:'One Piece Card Game'}};
+let spWorld='',spRows=[],spRequest=0,spOrigin=null;
+function spRead(key){try{return JSON.parse(store.get(key))}catch(e){return null}}
+function spRecent(g){const v=spRead('mcp_set_picker_recent_v1_'+g);return Array.isArray(v)?v.filter(x=>typeof x==='string').slice(0,3):[]}
+function spRemember(g,id){store.set('mcp_set_picker_recent_v1_'+g,JSON.stringify([id,...spRecent(g).filter(x=>x!==id)].slice(0,3)))}
+function spCurrent(g){return spWorlds[g].api?.pickerCurrent().id||mcpActive[g]}
+function spLocalRows(g){return Object.entries(MCP_REGULAR_SETS[g]).map(([id,cfg],index)=>({id,name:cfg.name,group:g==='lc'?'Lorcana-Erweiterungen':id.startsWith('prb')?'Premium Booster':'Hauptsets',index})).reverse()}
+function spData(g,row){
+ if(spWorlds[g].api)return spWorlds[g].api.pickerProgress(row);
+ const cards=mcpData[g][row.id]||[];
+ const owned=row.id===mcpActive[g]?(g==='lc'?lcSave.owned:opSave.owned):mcpReadSave(g==='lc'?(row.id==='lc1'?'mcp_lorcana_save_v1':'mcp_lorcana_'+row.id+'_save_v1'):(row.id==='op01'?'mcp_op01_test_save_v1':'mcp_'+row.id+'_save_v1')).owned;
+ if(g==='lc')return {total:cards.length,have:cards.filter(c=>lcUnifiedCount(c,owned)>0).length,image:''};
+ const ids=[...new Set(cards.map(c=>c.id))];return {total:ids.length,have:ids.filter(id=>Number(owned[id])>0).length,image:''};
+}
+function spTile(row){
+ const d=spData(spWorld,row),pct=d.total?Math.round(d.have/d.total*1000)/10:0;
+ const art='<span class="sp-fallback"'+(d.image?' hidden':'')+'>'+esc(row.id.toUpperCase())+'</span>';
+ return '<button type="button" class="sp-tile" data-sp-id="'+esc(row.id)+'" aria-current="'+(row.id===spCurrent(spWorld))+'"><span class="sp-art">'+(d.image?'<img src="'+esc(d.image).replace(/"/g,'&quot;')+'" alt="" loading="lazy" referrerpolicy="no-referrer">':'')+art+'</span><span class="sp-name">'+esc(row.name)+'</span><span class="sp-id">'+esc(row.id.toUpperCase())+(row.id===spCurrent(spWorld)?' · Aktuell':'')+'</span>'+(d.total?'<span class="sp-progress"><span class="sp-numbers"><span>'+d.have+' / '+d.total+' gesammelt</span><b>'+pct.toLocaleString('de-DE')+' %</b></span><span class="sp-track" role="progressbar" aria-label="Sammlungsfortschritt" aria-valuemin="0" aria-valuemax="'+d.total+'" aria-valuenow="'+d.have+'"><i style="width:'+pct+'%"></i></span></span>':'<span class="sp-pending">Fortschritt nach dem Laden verfügbar'+(d.catalogTotal?' · '+d.catalogTotal+' Katalogkarten':'')+'</span>')+'</button>';
+}
+function spRender(){
+ const q=document.getElementById('spSearch').value.trim().toLocaleLowerCase('de-DE'),group=document.getElementById('spGroup').value;
+ const rows=spRows.filter(r=>(!group||r.group===group)&&(!q||(r.name+' '+r.id).toLocaleLowerCase('de-DE').includes(q)));
+ const recent=[...new Set([spCurrent(spWorld),...spRecent(spWorld)])].slice(0,3).map(id=>rows.find(r=>r.id===id)).filter(Boolean);
+ const section=(title,list)=>'<h3>'+esc(title)+'</h3><div class="sp-grid">'+list.map(spTile).join('')+'</div>';
+ let out=recent.length&&!q?section('Zuletzt verwendet',recent):'';
+ for(const name of [...new Set(rows.map(r=>r.group))])out+=section(name,rows.filter(r=>r.group===name));
+ document.getElementById('spContent').innerHTML=out||'<p class="sp-status">Keine Sets für diese Suche gefunden.</p>';
+}
+async function spOpen(g,origin){
+ if(busy||phase!=='idle')return;
+ spWorld=g;spOrigin=origin;const req=++spRequest;spRows=[];
+ document.getElementById('spTitle').textContent='Set wechseln';document.getElementById('spSubtitle').textContent=spWorlds[g].title+' · Dein Fortschritt je Set';
+ document.getElementById('spSearch').value='';document.getElementById('spGroup').innerHTML='<option value="">Alle Serien</option>';
+ document.getElementById('spContent').innerHTML='<p class="sp-status">Set-Auswahl wird geladen …</p>';spShowWithFocus();
+ try{const rows=spWorlds[g].api?await spWorlds[g].api.pickerSets():spLocalRows(g);if(req!==spRequest||!spDialog.open)return;
+  spRows=spWorlds[g].api?rows.map((r,index)=>({...r,index})).sort((a,b)=>String(b.date||'').localeCompare(String(a.date||''))||b.index-a.index):rows;
+  document.getElementById('spGroup').innerHTML='<option value="">Alle Serien</option>'+[...new Set(spRows.map(r=>r.group))].map(name=>'<option value="'+esc(name).replace(/"/g,'&quot;')+'">'+esc(name)+'</option>').join('');spRender();
+ }catch(e){if(req===spRequest)document.getElementById('spContent').innerHTML='<p class="sp-status">Die Set-Liste konnte nicht vollständig geladen werden. Bitte prüfe die Verbindung und öffne die Auswahl erneut.</p>';}
+}
+spDialog.querySelector('.sp-close').addEventListener('click',()=>spDialog.close());
+spDialog.addEventListener('close',()=>{spRequest++;spOrigin?.focus()});
+document.getElementById('spSearch').addEventListener('input',spRender);document.getElementById('spGroup').addEventListener('change',spRender);
+document.getElementById('spContent').addEventListener('error',e=>{if(e.target.tagName==='IMG'){e.target.hidden=true;e.target.nextElementSibling.hidden=false}},true);
+document.getElementById('spContent').addEventListener('click',async e=>{
+ const button=e.target.closest('[data-sp-id]');if(!button)return;const row=spRows.find(r=>r.id===button.dataset.spId);if(!row)return;
+ if(spWorlds[spWorld].api?.pickerCurrent().loading)return;
+ const g=spWorld;spRemember(g,row.id);spDialog.close();
+ if(spWorlds[g].api)await spWorlds[g].api.pickerSelect(row);else{const select=document.getElementById(g+'Set');select.value=row.id;select.dispatchEvent(new Event('change',{bubbles:true}));}
+ spUpdate();
+});
+function spUpdate(){for(const g of Object.keys(spWorlds))for(const suffix of ['', 'A']){
+ const select=document.getElementById(g+'Set'+suffix),button=document.getElementById(g+'SetPicker'+suffix);if(!select||!button)continue;
+ button.querySelector('span').textContent=select.selectedOptions[0]?.textContent?.replace(/ · online$/,'')||'Set auswählen';button.disabled=select.disabled;
+}}
+for(const g of Object.keys(spWorlds))for(const suffix of ['', 'A']){
+ const select=document.getElementById(g+'Set'+suffix);if(!select)continue;
+ select.classList.add('set-picker-native');const series=document.getElementById(g+'Series'+suffix);series?.classList.add('set-picker-native');
+ const button=document.createElement('button');button.type='button';button.id=g+'SetPicker'+suffix;button.className='set-picker-trigger';button.setAttribute('aria-haspopup','dialog');button.setAttribute('aria-controls','setPicker');button.innerHTML='<span>Set auswählen</span><b>Set wechseln ▾</b>';select.insertAdjacentElement('afterend',button);button.addEventListener('click',()=>spOpen(g,button));
+ new MutationObserver(spUpdate).observe(select,{childList:true,attributes:true});
+ select.addEventListener('change',()=>{spRemember(g,select.value);queueMicrotask(spUpdate)});
+}
+spUpdate();
+
+// Presentation only: derive help from the same profiles used for draws and purchases.
+function detailPct(n){return Number(n).toLocaleString('de-DE',{maximumFractionDigits:4})+' %'}
+function detailTable(weights,labels=RARITIES){const sum=Object.values(weights).reduce((n,v)=>n+Number(v),0);return '<table class="rate-table"><thead><tr><th>Kategorie</th><th>Modellchance je Platz</th></tr></thead><tbody>'+Object.entries(weights).filter(([,v])=>v>0).map(([k,v])=>'<tr><td>'+esc(typeof labels[k]==='string'?labels[k]:labels[k]?.name||k)+'</td><td>'+detailPct(v/sum*100)+'</td></tr>').join('')+'</tbody></table>'}
+function detailSlots(slots,labels){return slots.map((w,i)=>'<details><summary>Kartenplatz '+(i+1)+'</summary>'+detailTable(w,labels)+'</details>').join('')}
+function detailPremium(g){
+ if(g==='mcp'||g==='pocket')return '<p>Für diesen Bereich wird kein Premium-Display angeboten.</p>';
+ const ctx=g==='live'?LIVE.rewardContext():mcp60Context();
+ // The current mode can be Start; build a local read-only context for LC/OP help.
+ const cards=g==='lc'?lcUnifiedCards():g==='op'?OP_CARDS:LIVE.openingPool();
+ const profile=premiumProfile(g==='live'?ctx&&{...ctx,cards,game:g,source:LIVE.src,setId:LIVE.set.id}:{key:'help',cards:cards.filter(c=>c.packEligible!==false&&!c.catalogOnly),game:g,setId:mcpActive[g],title:mcpSetName(g)});
+ if(!profile)return '<p>Premium-Informationen erscheinen nach dem Laden des Sets.</p>';
+ return '<p><b>'+profile.n+' Packs · '+profile.cost+' Token</b></p><ul>'+profile.rules.map(r=>'<li>Mindestens '+r.n+' × '+esc(r.label)+'</li>').join('')+'</ul><p>'+(!profile.available?'Der Kauf ist wegen fehlender Garantie-Kartenpools derzeit deaktiviert. ':'')+'Diese Mindesttreffer gelten ausschließlich beim Kauf eines Premium-Displays. Zusätzliche natürliche Treffer bleiben erhalten. Standard- und Parallel-Garantien werden getrennt gezählt. Bereits vorhandene Karten können enthalten sein.</p>';
+}
+function detailSpecial(g){
+ if(g==='pocket')return ''; // Pocket pack models and their probabilities are listed together below.
+ if(g==='mcp'||g==='lc')return '<p>Für diesen Bereich ist kein God-Pack aktiviert.</p>';
+ const cards=g==='live'?LIVE.openingPool():OP_CARDS,recipe=premiumGodRecipe({game:g,setId:g==='live'?LIVE.set?.id:mcpActive.op,cards});
+ return recipe?'<p>'+esc(recipe.name)+': '+detailPct(recipe.p*100)+' pro Pack im Webapp-Modell. '+esc(recipe.note)+' Diese Überraschung kann auch in normalen Packs auftreten und ist nicht separat kaufbar.</p>':'<p>Für dieses Set ist kein zusätzliches God-/Demigod-Pack aktiviert.</p>';
+}
+function detailSources(g){const links=g==='lc'?[['Deutscher Kartenkatalog · Ravensburger','https://cards.disneylorcana.com/de-DE/'],['Seltenheiten · Ravensburger','https://www.disneylorcana.com/de-DE/news/2025/08/2025-8-stunning-new-rarities']]:g==='op'?[['Offizieller Kartenkatalog · Bandai','https://en.onepiece-cardgame.com/cardlist/'],['Katalogdaten · OPTCG API','https://optcgapi.com/']]:g==='pocket'?[['Pocket-Kartendatenbank','https://github.com/flibustier/pokemon-tcg-pocket-database'],['Katalogdaten · TCGdex','https://tcgdex.dev/']]:g==='live'?[['Katalogdaten · TCGdex','https://tcgdex.dev/']]:[];return links.length?'<p>Die Quellen dienen der Karten-, Bild- und Produktzuordnung. Sie bestätigen nicht unsere angepassten Ziehchancen oder Premium-Garantien.</p><ul>'+links.map(([name,url])=>'<li><a href="'+url+'" target="_blank" rel="noopener noreferrer">'+esc(name)+'</a></li>').join('')+'</ul>':'<p>Monster Cards verwendet eigene Karten und ein eigenes Ziehmodell.</p>'}
+function detailContent(g){
+ let title='',layout='',rates='',protection='',collection='';
+ if(g==='mcp'){title='Monster Cards';layout='5 Karten pro Pack. Die ersten drei Kartenplätze verwenden dasselbe Modell.';rates=detailSlots([ODDS.slots1to3,ODDS.slots1to3,ODDS.slots1to3,ODDS.slot4,ODDS.slot5]);protection='In diesem Bereich gibt es keinen Duplikatschutz; dieselbe Karte kann mehrfach gezogen werden.';}
+ else if(g==='lc'||g==='op'){
+  title=mcpSetName(g);const m=MCP_FINAL_MODELS[g][mcpActive[g]];if(!m)return '<p>Das Set-Modell wird geladen.</p>';
+  protection='50 % Duplikatschutz: Ist die gewählte Karte bereits vorhanden oder in diesem Opening schon gezogen, wird nach Möglichkeit eine fehlende Karte desselben zulässigen Pools gewählt. Das garantiert keine neue Karte.';
+  if(g==='lc'){layout='8 Karten: 3 Gewöhnliche, 2 Ungewöhnliche, 2 Seltene oder höher und 1 besonderer Kartenplatz.';rates='<h4>Jeder der zwei Plätze „Selten oder höher“</h4>'+detailTable(m.normal)+'<h4>Besonderer Kartenplatz</h4>'+detailTable(m.foil);collection='Ein Sammeleintrag je Kartenmotiv. Alte Normal- und Foil-Mengen werden gemeinsam gezählt. Der besondere Platz kann dasselbe Motiv wie ein vorheriger Platz enthalten. Zusatzdrucke aus anderen Produkten gehören zu unserem Sammelmodell und sind keine Behauptung über echte Booster-Inhalte.';}
+  else{const prb=mcpActive.op==='prb01';layout=(prb?'10':'8')+' Karten: 3 Common, 2 Uncommon, 1 Common-/Leader-Platz (Leader '+detailPct(m.leader*100)+'), 1 Rare und 1 Trefferplatz.'+(prb?' PRB-01 ergänzt zwei weitere Common-/Uncommon-Karten.':'')+' DON!!-Karten sind nicht Teil dieses Sammelmodells.';rates=detailTable(m.hit,{R:'Rare',SR:'Super Rare',SEC:'Secret Rare · Standard',AA:'Alternate Art ohne Leader',LAA:'Leader Alternate Art',SP:'SP / Sonderdruck',M:'Manga / Super Alternate Art',BT:'Box-Topper'});collection='Druckversionen bleiben getrennte Sammeleinträge. Normale Packs enthalten keine doppelte Karten-ID; Spezialpacks verwenden ihr eigenes Rezept. Box-Topper und Sonderdrucke sind, sofern im Pool vorhanden, Teil des angepassten Sammelmodells. OP13 Super Alternate Art einschließlich Red verwendet den gemeinsamen Manga-Modellpool.';}
+ }else{
+  const api=g==='pocket'?POCKET:LIVE,st=api.set;if(!st)return '<p>Setdaten werden geladen …</p>';title=st.name;const pl=api.openingPool();
+  layout=(st.prof.slots.length)+' Karten im regulären Modell. Die ausgewählte Booster-Variante bestimmt den zulässigen Kartenpool ('+pl.length+' Karteneinträge).';
+  protection=g==='live'&&st.id==='cel25'?'Für dieses Jubiläumsprofil ist kein Duplikatschutz aktiv.':'50 % Duplikatschutz innerhalb des ausgewählten Kartenpools. Bereits vorhandene oder im Opening gezogene Karten werden nach Möglichkeit durch eine fehlende Karte desselben Pools ersetzt. Neue Karten sind nicht garantiert.';
+  collection='Die Sammeleinträge entsprechen dem Album. Der Opening-Filter verändert nur die Anzeige; sämtliche gezogenen Karten werden gesammelt.';
+  if(g==='pocket'){
+   const labels={C:'Diamant 1',U:'Diamant 2',R:'Diamant 3',CF:'Diamant 1 Foil',UF:'Diamant 2 Foil',RF:'Diamant 3 Foil',RR:'Diamant 4 ex',AR:'Stern 1',SR:'Stern 2',IM:'Immersiv',S:'Shiny 1',SSR:'Shiny 2',UR:'Krone',Rbaby:'Baby Diamant 3',ARbaby:'Baby Stern 1',IMbonus:'Immersiver Bonus'};
+   rates=st.prof.pocket.models.map(model=>'<details><summary>'+esc(model.name)+' · '+detailPct(model.chance*100)+' · '+model.slots.length+' Karten</summary>'+detailSlots(model.slots.map(row=>Object.fromEntries(Object.entries(row).filter(([k,w])=>w>0&&pl.some(c=>pocketPoolCode(st,c)===k)))),labels)+'</details>').join('');layout+=' Sonder- und Bonuspacks können eine andere Kartenanzahl haben. Ihre Modellchancen stehen unten.';if(st.id==='B4b')layout+=' B4b verwendet ein vorläufiges Rekonstruktionsmodell.';
+  }else{
+   rates=detailSlots(st.prof.slots.map(slot=>{const w={};for(const [pool,weight]of liveSlotOptions(pl,slot))for(const c of pool)w[c.rar]=(w[c.rar]||0)+weight/pool.length;return w;}));
+   if(st.prof.god)rates+='<details><summary>Profil-Sonderpack · '+detailPct(st.prof.god.p*100)+'</summary>'+detailSlots(st.prof.slots.map(()=>{const w={};for(const [pool,weight]of liveSlotOptions(pl,st.prof.god.slot))for(const c of pool)w[c.rar]=(w[c.rar]||0)+weight/pool.length;return w;}))+'</details>';
+   if(st.poolFallbacks?.length)collection+=' Für '+st.poolFallbacks.length+' Karten ohne eigenen Slot werden vorhandene Poolfamilien verwendet; ihre Album-Seltenheit bleibt erhalten.';
+  }
+ }
+ return '<p><b>'+esc(title)+' · Angepasstes Webapp-Modell</b></p><p>Die folgenden Chancen beschreiben die aktuelle App, keine offiziellen Produktionsraten.</p><h4>Packaufbau und Sammlung</h4><p>'+esc(layout)+'</p>'+(collection?'<p>'+esc(collection)+'</p>':'')+'<h4>Ziehchancen</h4><p>Chancen je Kartenplatz, nicht je Display. Fehlende Poolkategorien werden nach dem jeweiligen Ziehmodell ausgeschlossen oder auf vorhandene Pools verteilt. Bei gemischten Pools beziehen sich die Werte auf die erste Auswahl vor dem Duplikatschutz.</p>'+rates+'<h4>Duplikate und Mehrfachöffnungen</h4><p>'+esc(protection)+'</p><p>Normale Einzelpacks und 10er-Openings haben keine garantierten Mindesttreffer und keinen zusätzlichen 10er-Bonus.</p><h4>Premium-Display</h4>'+detailPremium(g)+'<h4>Spezialpacks</h4>'+detailSpecial(g)+(g==='pocket'?'<p>Pocket-Spezialpacks werden oben als eigene Packmodelle aufgeführt. Ihre Chancen sind Webapp-Annahmen; sie sind nicht separat kaufbar.</p>':'')+'<h4>Kartendaten und Quellen</h4>'+detailSources(g);
+}
+function detailRender(g){const body=document.getElementById('modelInfo-'+g);if(body)body.innerHTML=detailContent(g)}
+for(const [g,view,odds]of [['mcp','packs',''],['pocket','orig','orOdds'],['live','live','tlOdds'],['lc','lcpacks',''],['op','oppacks','']]){
+ const host=document.getElementById('view-'+view);let box=host.querySelector('details.infobox');if(!box){box=document.createElement('details');box.className='infobox';(host.querySelector('.dk-panel')||host).append(box)}
+ const native=odds?document.getElementById(odds):null;box.replaceChildren();box.innerHTML='<summary>Pack-Modell, Chancen &amp; Quellen</summary><div class="or-note model-info" id="modelInfo-'+g+'"></div>';if(native){native.hidden=true;native.classList.add('model-native');box.append(native);new MutationObserver(()=>detailRender(g)).observe(native,{childList:true,subtree:true,characterData:true})}
+ detailRender(g);
+}
+// Replace the obsolete public audit panel with current catalog availability, without old release claims.
+const legacyCatalog=document.getElementById('mcp49Panel');if(legacyCatalog){legacyCatalog.hidden=true;legacyCatalog.classList.add('model-native')}
+mcpRenderModelInfo=function(g){detailRender(g)};
+function detailRefresh(){for(const g of ['pocket','live','lc','op'])detailRender(g)}
+for(const id of ['orInfo','tlInfo','lcInfo','opInfo'])new MutationObserver(detailRefresh).observe(document.getElementById(id),{childList:true,subtree:true,characterData:true});
+document.addEventListener('change',e=>{if(['orBooster','tlBooster'].includes(e.target.id))queueMicrotask(detailRefresh)});
+function albumMissingOverlay(c){return '<div class="mn album-missing-label"><span class="album-missing-number">'+esc(c.op?c.card_set_id:'Nr. '+(c.collectorLabel??c.number))+'</span><b>'+esc(c.name)+'</b><small>'+esc(RARITIES[c.rar]?.name||c.rarity||'')+'</small></div>'}
+const detailLcCard=lcCardHTML;lcCardHTML=function(c,extra='',large=false){let html=detailLcCard(c,extra,large);if(/lc-miss|grayed/.test(extra)){const i=html.lastIndexOf('</div>');html=html.slice(0,i)+albumMissingOverlay(c)+html.slice(i)}return html};
+const detailOpCard=opCardHTML;opCardHTML=function(c,extra=''){let html=detailOpCard(c,extra);if(/lc-miss|grayed/.test(extra)){const i=html.lastIndexOf('</div>');html=html.slice(0,i)+albumMissingOverlay(c)+html.slice(i)}return html};
+for(const [g,render]of [['lc',lcRenderAlbum],['op',opRenderAlbum]]){
+ const clean=()=>{render();document.querySelectorAll('#'+g+'Grid .lc-name,#'+g+'Grid .lc-count').forEach(e=>e.remove())};if(g==='lc')lcRenderAlbum=clean;else opRenderAlbum=clean;clean();
+}
+
+function spShowWithFocus(){
+ const mobile=matchMedia('(max-width: 650px), (pointer: coarse)').matches;
+ const search=document.getElementById('spSearch'),close=spDialog.querySelector('.sp-close');
+ // Set autofocus before showModal: remembered input focus must not summon a mobile keyboard.
+ search.autofocus=!mobile;close.autofocus=mobile;
+ spDialog.showModal();(mobile?close:search).focus({preventScroll:true});
+}
+
+const designToneButton=document.createElement('button');designToneButton.type='button';designToneButton.id='designToneToggle';designToneButton.className='design-tone-toggle';
+document.getElementById('btnMute').insertAdjacentElement('afterend',designToneButton);
+const APP_THEME_KEY='mcp_theme_v1';let designTone=store.get(APP_THEME_KEY)==='dark'?'dark':'light';document.body.dataset.appDesign='worlds';
+function designToneRefresh(){document.body.dataset.designTone=designTone;designToneButton.innerHTML=designTone==='light'?'☾ <span>Dunkelmodus</span>':'☀ <span>Hellmodus</span>';designToneButton.setAttribute('aria-label',designTone==='light'?'Zum Dunkelmodus wechseln':'Zum Hellmodus wechseln');designToneButton.title=designToneButton.getAttribute('aria-label');designToneButton.hidden=document.body.dataset.appDesign!=='worlds';}
+designToneButton.addEventListener('click',()=>{designTone=designTone==='light'?'dark':'light';store.set(APP_THEME_KEY,designTone);designToneRefresh()});
+designToneRefresh();
+const designWorlds=[{id:'mcp',name:'Monster Cards Pocket'},{id:'pocket',name:'Pokémon TCG Pocket'},{id:'live',name:'Pokémon TCG Live'},{id:'lc',name:'Disney Lorcana'},{id:'op',name:'One Piece Card Game'}];
+const designWorldButton=document.createElement('button');designWorldButton.type='button';designWorldButton.className='design-world-trigger';designWorldButton.id='designWorldTrigger';designWorldButton.setAttribute('aria-haspopup','dialog');designWorldButton.setAttribute('aria-controls','designWorldDialog');designWorldButton.innerHTML='<span>Kartenwelt wählen</span><small>Kartenwelt wechseln ▾</small>';document.getElementById('modeSw').insertAdjacentElement('afterend',designWorldButton);
+const designWorldDialog=document.createElement('dialog');designWorldDialog.id='designWorldDialog';designWorldDialog.setAttribute('aria-labelledby','designWorldTitle');designWorldDialog.innerHTML='<div class="dw-head"><h2 id="designWorldTitle">Deine Kartenwelten</h2><button type="button" class="dw-close" aria-label="Kartenwelt-Auswahl schließen">✕</button></div><div class="dw-grid">'+designWorlds.map(w=>'<button type="button" class="dw-choice" data-world="'+w.id+'">'+(document.querySelector('.start-world-'+w.id+' svg')?.outerHTML||'')+'<span>'+w.name+'</span></button>').join('')+'</div>';document.body.append(designWorldDialog);
+function designWorldRefresh(){const selected=document.querySelector('#modeSw [data-mode].on')?.dataset.mode,home=document.body.classList.contains('m-start');designWorldButton.querySelector('span').textContent=home?'Kartenwelt wählen':designWorlds.find(w=>w.id===selected)?.name||'Kartenwelt wählen';for(const button of designWorldDialog.querySelectorAll('[data-world]'))button.setAttribute('aria-current',String(!home&&button.dataset.world===selected));}
+new MutationObserver(designWorldRefresh).observe(document.body,{attributes:true,attributeFilter:['class']});designWorldRefresh();
+designWorldButton.addEventListener('click',()=>{designWorldRefresh();designWorldDialog.showModal()});designWorldDialog.querySelector('.dw-close').addEventListener('click',()=>designWorldDialog.close());designWorldDialog.addEventListener('close',()=>designWorldButton.focus());
+designWorldDialog.addEventListener('click',e=>{const button=e.target.closest('[data-world]');if(!button)return;designWorldDialog.close();document.querySelector('#modeSw [data-mode="'+button.dataset.world+'"]').click();designWorldRefresh()});
+
+// Mirror the existing saved pack count in the album; collection calculations are unchanged.
+const mcpAlbumPacks=document.createElement('p');mcpAlbumPacks.id='mcpAlbumPacks';
+const mcpAlbumFilters=document.querySelector('#view-album .filters');mcpAlbumFilters.before(document.getElementById('mcpProg'),mcpAlbumPacks);
+const themeUpdateHeader=updateHeader;updateHeader=function(){themeUpdateHeader();mcpAlbumPacks.textContent=save.packs.toLocaleString('de-DE')+' Packs geöffnet';};updateHeader();
+
+function themeLorcanaAlbumStats(){
+ const el=document.getElementById('lcProg');el.classList.add('lc-album-stats');
+ const have=LC_BASE.filter(c=>lcUnifiedCount(c)>0).length;
+ el.innerHTML='<span><b>'+esc(mcpSetName('lc'))+'</b> · '+have+'/'+LC_BASE.length+' gesammelt · '+lcSave.packs.toLocaleString('de-DE')+' Packs geöffnet</span>'+['LC1','LC2','LC3','LC4','LC5','LC7','LC6','LC8','LC9'].map(r=>{const cards=LC_BASE.filter(c=>c.rar===r);return cards.length?'<span>'+esc(LC_RAR[r].sym+' '+LC_RAR[r].name)+': <b>'+cards.filter(c=>lcUnifiedCount(c)>0).length+'/'+cards.length+'</b></span>':''}).join('');
+}
+const themeLcAlbumRender=lcRenderAlbum;lcRenderAlbum=function(){themeLcAlbumRender();themeLorcanaAlbumStats();};themeLorcanaAlbumStats();
 
 })();
 </script>
@@ -6199,7 +6617,7 @@ sync();
 #versionHistoryDone{border:1px solid #d7b46c;border-radius:10px;padding:9px 19px;background:#ffdc84;color:#30231b;font:700 14px var(--font,sans-serif);cursor:pointer}
 @media(max-width:420px){#versionHistoryDialog header{padding:14px 15px}#versionHistoryDialog .history-content{padding:0 15px 12px}#versionHistoryDialog footer{padding:11px 15px}}
 </style>
-<dialog id="versionHistoryDialog" aria-labelledby="versionHistoryTitle" data-version="v1.3.2"><header><div><h2 id="versionHistoryTitle">Was ist neu?</h2><p>Die letzten Änderungen an deinen Kartenwelten.</p></div><button type="button" id="versionHistoryClose" aria-label="Neuerungen schließen">×</button></header><div class="history-content"><section class="history-version"><h3>v1.3.2 <small>12. Oktober 2026</small></h3><ul><li><strong>Lorcana: eine Sammlung je Kartenmotiv</strong><p>Normal- und Foil-Kopien werden gemeinsam gezählt. Deine bisherigen Kopien bleiben vollständig erhalten; besondere Illustrationen bleiben eigene Karten.</p></li><li><strong>Neuer Foil-Look für besondere Lorcana-Karten</strong><p>Episch, Mythisch, Verzaubert und Ikonisch erhalten einen durchgängigen Foil-Effekt über der gesamten Karte. Die höchsten Seltenheiten behalten ihre Originalfarben; Regenbogen und Gold liegen in beweglichen Glanzreflexen. In der Großansicht und beim Aufdecken wandert der Glanz ruhig weiter. Auch auf dem Handy bedienbar, ohne separate Foil-Sammelvariante.</p></li><li><strong>Deutscher Lorcana-Katalog korrigiert</strong><p>Verwechselte Promo-Bilder wurden durch die passenden deutschen Setkarten ersetzt. Auch die vier Zusatzdrucke aus Die große Honigrettung sind jetzt mit deutschen Originalbildern zugeordnet und im Webapp-Modell wieder ziehbar. Vorhandene Kopien bleiben erhalten.</p></li><li><strong>Lorcana-Filter und Tausch vereinheitlicht</strong><p>Fortschritt, neue Karten und Doppelte beziehen sich auf das Kartenmotiv. Hit-Regeln und Tauschwerte richten sich nach der Seltenheit; die separate Foil-Auswahl entfällt.</p></li></ul></section><section class="history-version"><h3>v1.3.1 <small>Vorherige Neuerungen</small></h3><ul><li><strong>Deine Kartenwelten auf der Startseite</strong><p>Wechsle schnell zwischen den fünf Kartenwelten und sieh deine Sammlungszahlen und Fortschrittsbalken. Die Startseite zeigt außerdem die letzten Neuerungen.</p></li><li><strong>Opening-Filter für jedes Set</strong><p>Lege fest, welche Seltenheiten als Hits zählen – mit derselben Auswahl und Reihenfolge wie im Album. Beim 10er-Opening werden nur die passenden Treffer einzeln gezeigt; alle gezogenen Karten werden gesammelt.</p></li><li><strong>Nur neue Karten anzeigen</strong><p>Die Checkbox im Opening-Filter zeigt ausschließlich erstmals gesammelte Karten, unabhängig von ihrer Seltenheit. Mehrfach gezogene Kopien derselben neuen Karte gelten nur beim ersten Mal als neu. Verfügbar in allen Kartenwelten.</p></li><li><strong>Übersichtlichere Öffnungen</strong><p>Der sichtbare Stapel enthält maximal acht Karten, damit Hinweise lesbar bleiben. Nach einem einzelnen Pack, einem 10er-Opening oder einem Premium-Display kannst du direkt zur Boosterauswahl zurückkehren.</p></li><li><strong>Premium-Displays mit garantierten Hits</strong><p>Für Pokémon TCG Live, Lorcana und One Piece gibt es Premium-Displays gegen zusätzliche Pack-Token. Vor dem Kauf siehst du den Preis und die garantierten Mindesttreffer des gewählten Sets.</p></li><li><strong>Seltene God-Pack-Überraschungen</strong><p>In unterstützten Sets können zufällig besondere Packs auftauchen: Pokémon 151, Prismatische Entwicklungen und One Piece PRB-01. Der Inhalt hängt vom Set ab. God Packs sind nicht separat kaufbar; bei Lorcana gibt es keine God Packs.</p></li><li><strong>Doppelte bequem am Handy tauschen</strong><p>Wähle Mengen mit Plus, Minus oder Max statt Tippen in einzelnen Feldern. Tausche Doppelte gegen Token oder genau vier passende Doppelte gegen eine fehlende Wunschkarte. Mindestens eine Kopie bleibt erhalten.</p></li><li><strong>Ein Dankeschön: 100 Token</strong><p>Auf der Startseite kannst du bis zum 18. Oktober 2026 einmalig 100 zusätzliche Pack-Token abholen.</p></li></ul></section></div><footer><button type="button" id="versionHistoryDone">Alles klar</button></footer></dialog>
+<dialog id="versionHistoryDialog" aria-labelledby="versionHistoryTitle" data-version="v1.3.2"><header><div><h2 id="versionHistoryTitle">Was ist neu?</h2><p>Die letzten Änderungen an deinen Kartenwelten.</p></div><button type="button" id="versionHistoryClose" aria-label="Neuerungen schließen">×</button></header><div class="history-content"><section class="history-version"><h3>v1.3.2 <small>13. Oktober 2026</small></h3><ul><li><strong>Kartenwelt-Design und mobile Navigation</strong><p>Einheitliche helle Oberflächen mit Rosa/Violett für Monster Cards, Mint/Creme für Pocket, Eisblau/Türkis für TCG Live, Türkis/Lavendel für Lorcana und Meerblau/Sandgold für One Piece. Ein Mond-/Sonnenbutton schaltet den appweiten Hell-/Dunkelmodus um; die Wahl bleibt beim TCG-Wechsel und nach Neuladen erhalten. Auf dem Handy ersetzt eine Auswahl mit allen fünf TCGs die schiebbare obere Leiste. Booster und Sammlungsdaten bleiben unverändert. Die Kopfzeile zeigt keine doppelten Monster-Cards-Sammlungs-/Pack-Zähler mehr; im Album stehen Fortschritt und geöffnete Packs über den Filtern. Lorcana zeigt wie Pokémon eine Set-/Pack-Übersicht sowie gesammelte Karteneinträge je Seltenheit statt technischer Kataloghinweise.</p></li><li><strong>Mobil entspannt zwischen Sets wechseln</strong><p>Die Set-Auswahl öffnet auf schmalen Bildschirmen und Touch-Geräten ohne automatischen Fokus im Suchfeld. Damit verdeckt die Bildschirmtastatur nicht sofort die Set-Kacheln. Erst Antippen aktiviert die Suche. Am Desktop wird das Suchfeld weiterhin direkt fokussiert. Gilt für Packs und Album in Pocket, TCG Live, Lorcana und One Piece.</p></li><li><strong>Pack-Infos, Alben und Geschenk-Hinweis aufgeräumt</strong><p>Packaufbau, Modellchancen, Duplikatschutz, Premium-Garantien, Spezialpacks und Quellen werden einheitlich aus den aktuellen App-Profilen dargestellt. Veraltete Aussagen zu Display-Garantien und Katalogständen sind entfernt. Lorcana und One Piece zeigen bei fehlenden Karten Nummer, Name und Seltenheit direkt auf der Karte; die separaten Namen- und Mengenzeilen unter Albumkarten entfallen. Das 100-Token-Geschenk wird nach dem Abholen ausgeblendet, auch nach Neuladen. Die Startseite verwendet für alle TCGs einheitlich „Karteneinträge gesammelt“; die Zählweise bleibt unverändert.</p></li><li><strong>Premium-Garantien für Lorcana und One Piece angepasst</strong><p>Lorcana: 24 Packs für 40 Token mit mindestens 6 Epischen, 4 Legendären und 1 Verzauberten. Sets mit Mythisch garantieren zusätzlich 1 Mythische. Ikonisch bleibt eine zufällige Überraschung. One Piece: 24 Packs für 30 Token mit mindestens 6 Standard-SR, 1 Standard-SEC und 2 Alternate-Art-/Parallelkarten; PRB-01 enthält 20 Packs für 25 Token mit denselben Mindesttreffern. Keine Doppelanrechnung zwischen Standard- und Parallel-Garantien. Natürlich gezogene zusätzliche Treffer bleiben erhalten. Eigene Webapp-Garantien, keine offiziellen Display-Pull-Rates.</p></li><li><strong>Visuelle Set-Auswahl in vier Kartenwelten</strong><p>Pocket, Pokémon TCG Live, Lorcana und One Piece zeigen Sets als Kacheln mit Sammlungsfortschritt. Suche nach Namen oder Kürzel, grenze nach Serie ein und kehre über zuletzt verwendete Sets schnell zurück. Die Auswahl funktioniert bei Packs und im Album. Pocket-Booster wählst du anschließend unter der Erweiterung. Lorcana und One Piece verwenden einheitliche Set-Kürzel, auch unter „Zuletzt verwendet“; dort gibt es keine Karten- oder Coverbilder. Noch nicht geladene Kataloge sind gekennzeichnet; bestehende Kopien und Token bleiben erhalten.</p></li><li><strong>Lorcana: eine Sammlung je Kartenmotiv</strong><p>Normal- und Foil-Kopien werden gemeinsam gezählt. Deine bisherigen Kopien bleiben vollständig erhalten; besondere Illustrationen bleiben eigene Karten.</p></li><li><strong>Neuer Foil-Look für besondere Lorcana-Karten</strong><p>Episch, Legendär, Mythisch, Verzaubert und Ikonisch erhalten einen durchgängigen Foil-Effekt über der gesamten Karte. Die höchsten Seltenheiten behalten ihre Originalfarben; Regenbogen und Gold liegen in beweglichen Glanzreflexen. In der Großansicht und beim Aufdecken wandert der Glanz ruhig weiter. Auch auf dem Handy bedienbar, ohne separate Foil-Sammelvariante. Ergänzt am 13. Oktober: Legendär mit warmem Satin-Goldglanz zwischen Episch und Mythisch; die anderen Stufen bleiben unverändert.</p></li><li><strong>Deutscher Lorcana-Katalog korrigiert</strong><p>Verwechselte Promo-Bilder wurden durch die passenden deutschen Setkarten ersetzt. Auch die vier Zusatzdrucke aus Die große Honigrettung sind jetzt mit deutschen Originalbildern zugeordnet und im Webapp-Modell wieder ziehbar. Vorhandene Kopien bleiben erhalten.</p></li><li><strong>Lorcana-Filter und Tausch vereinheitlicht</strong><p>Fortschritt, neue Karten und Doppelte beziehen sich auf das Kartenmotiv. Hit-Regeln und Tauschwerte richten sich nach der Seltenheit; die separate Foil-Auswahl entfällt.</p></li><li><strong>Pack-Token-Icon verbessert</strong><p>Ein helles Booster-Symbol ersetzt den dunklen Balken in der Token-Münze – im Guthaben und im Infofenster.</p></li></ul></section><section class="history-version"><h3>v1.3.1 <small>Vorherige Neuerungen</small></h3><ul><li><strong>Deine Kartenwelten auf der Startseite</strong><p>Wechsle schnell zwischen den fünf Kartenwelten und sieh deine Sammlungszahlen und Fortschrittsbalken. Die Startseite zeigt außerdem die letzten Neuerungen.</p></li><li><strong>Opening-Filter für jedes Set</strong><p>Lege fest, welche Seltenheiten als Hits zählen – mit derselben Auswahl und Reihenfolge wie im Album. Beim 10er-Opening werden nur die passenden Treffer einzeln gezeigt; alle gezogenen Karten werden gesammelt.</p></li><li><strong>Nur neue Karten anzeigen</strong><p>Die Checkbox im Opening-Filter zeigt ausschließlich erstmals gesammelte Karten, unabhängig von ihrer Seltenheit. Mehrfach gezogene Kopien derselben neuen Karte gelten nur beim ersten Mal als neu. Verfügbar in allen Kartenwelten.</p></li><li><strong>Übersichtlichere Öffnungen</strong><p>Der sichtbare Stapel enthält maximal acht Karten, damit Hinweise lesbar bleiben. Nach einem einzelnen Pack, einem 10er-Opening oder einem Premium-Display kannst du direkt zur Boosterauswahl zurückkehren.</p></li><li><strong>Premium-Displays mit garantierten Hits</strong><p>Für Pokémon TCG Live, Lorcana und One Piece gibt es Premium-Displays gegen zusätzliche Pack-Token. Vor dem Kauf siehst du den Preis und die garantierten Mindesttreffer des gewählten Sets.</p></li><li><strong>Seltene God-Pack-Überraschungen</strong><p>In unterstützten Sets können zufällig besondere Packs auftauchen: Pokémon 151, Prismatische Entwicklungen und One Piece PRB-01. Der Inhalt hängt vom Set ab. God Packs sind nicht separat kaufbar; bei Lorcana gibt es keine God Packs.</p></li><li><strong>Doppelte bequem am Handy tauschen</strong><p>Wähle Mengen mit Plus, Minus oder Max statt Tippen in einzelnen Feldern. Tausche Doppelte gegen Token oder genau vier passende Doppelte gegen eine fehlende Wunschkarte. Mindestens eine Kopie bleibt erhalten.</p></li><li><strong>Ein Dankeschön: 100 Token</strong><p>Auf der Startseite kannst du bis zum 18. Oktober 2026 einmalig 100 zusätzliche Pack-Token abholen.</p></li></ul></section></div><footer><button type="button" id="versionHistoryDone">Alles klar</button></footer></dialog>
 <script id="version-history-script">(()=>{
  function init(){
   const button=document.getElementById('versionHistoryOpen'),dialog=document.getElementById('versionHistoryDialog'),badge=document.getElementById('versionHistoryNew');if(!button||!dialog)return;
