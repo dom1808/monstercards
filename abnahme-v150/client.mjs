@@ -57,7 +57,7 @@ class AccountLabor {
     const m=snap.data(); let data=null;
     if(m.stage==='active'&&!m.deletionRequested) {
       const chunks=await Promise.all(Array.from({length:PARTS},(_,i)=>getDocFromServer(this.#ref(uid,'snapshots',String(i)))));
-      if(chunks.some(x=>!x.exists()||x.data().generation!==m.dataRevision)) throw Error('Ladekonflikt: neu laden');
+      if(chunks.some(x=>!x.exists()||x.data().generation!==m.dataRevision)) throw Error('Ladekonflikt: Datenstand '+m.dataRevision+' / Teile '+chunks.map(x=>x.exists()?x.data().generation:'fehlt').join(','));
       data=await decode(chunks.map(x=>x.data().fragment),m.dataDigest);
       const s=summary(data);
       if(s.day!==(m.dailyDay||'')||(s.gifts['thanks-2026-10']===true)!==(m.giftClaimed===true))throw Error('Belohnungsmarker widersprechen Spielstand');
@@ -65,7 +65,7 @@ class AccountLabor {
     }
     // Keine gemischte Generation übernehmen, wenn während des Ladens geschrieben wurde.
     const current=await getDocFromServer(this.#ref(uid));
-    if(current.data().revision!==m.revision) throw Error('Ladekonflikt: neu laden');
+    if(current.data().revision!==m.revision) throw Error('Ladekonflikt: Profilversion '+m.revision+' / aktuell '+current.data().revision);
     this.#assert(uid); this.cache={uid,meta:m,data};this.mode='account';
     this.status=this.#lease?.uid===uid&&this.#lease.epoch===m.epoch?'Gespeichert':'Nur Ansicht';
     if(m.deletionRequested){this.#lease=null;this.status='Löschung angefragt · Bearbeitung innerhalb von sieben Tagen';}
