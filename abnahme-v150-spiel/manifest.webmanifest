@@ -1,0 +1,33 @@
+{
+  "name": "MCP · Getrennter Android-Test",
+  "short_name": "MCP Test",
+  "description": "Isolierte v1.5.0-Abnahme. Keine echte Sammlung.",
+  "lang": "de",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f4f7f8",
+  "theme_color": "#f4f7f8",
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "./assets/app-icons/mcp-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/app-icons/mcp-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/app-icons/mcp-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "id": "/monstercards/abnahme-v150-spiel/"
+}
