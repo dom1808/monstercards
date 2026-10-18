@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; connect-src 'none'; form-action 'none'; base-uri 'none'; frame-src 'none'; object-src 'none'">
+<meta name="robots" content="noindex,nofollow"><title>Monster Cards Pocket · Gaststand nur sichern</title>
+<style>html{font:16px/1.5 system-ui;background:#edf4f5;color:#355364}body{max-width:760px;margin:auto;padding:18px;overflow-wrap:anywhere}h1{font-size:25px}section{padding:16px;border:1px solid #8299ad;border-radius:14px;margin:16px 0;background:#f9fcfc}button{font:inherit;min-height:48px;padding:10px 14px;margin:6px 0;border:1px solid #8299ad;border-radius:10px;background:#355364;color:white;max-width:100%;cursor:pointer}button:disabled{opacity:.5;cursor:default}textarea{width:100%;box-sizing:border-box;min-height:230px;font:13px/1.5 monospace;padding:8px;background:transparent;color:inherit;border:1px solid #8299ad}button:focus-visible{outline:3px solid #5c9ccd;outline-offset:3px}[hidden]{display:none!important}@media(prefers-color-scheme:dark){html{background:#14243b;color:#e4edf8}section{background:#152239}button{background:#20354d}}</style></head>
+<body><p>MONSTER CARDS POCKET · SEPARATE SICHERUNGSSEITE</p><h1>Gaststand unverändert sichern</h1>
+<p>Diese Seite liest ausschließlich normale lokale Gastspielstände. Sie ändert keine Karten, Token oder Einstellungen und meldet dich nirgendwo an. Keine Daten werden an Firebase oder einen anderen Server übertragen.</p>
+<p>Öffne sie mit demselben Chrome-Profil wie deine installierte Webapp. Leere oder andere Browserprofile können deinen Gaststand hier nicht zeigen.</p>
+<section><h2>1. Lokale Daten lesen</h2><button id="inspect" type="button">Gaststand lesen und Sicherung vorbereiten</button><p id="status" role="status" aria-live="polite">Noch keine Daten gelesen.</p></section>
+<section id="backupSection" hidden><h2>2. Unveränderte Originalsicherung</h2><p>Die Originalwerte werden auch bei einem Mengenfehler vollständig erhalten. Diese private Datei bleibt auf deinem Gerät. Nicht bei GitHub hochladen.</p><button id="download" type="button" disabled>Original-Gaststand herunterladen</button><p id="backupStatus" role="status"></p></section>
+<section id="reportSection" hidden><h2>3. Mengenprüfung</h2><p>Der Diagnosebericht enthält Zusammenfassungen und Fehlertypen, keine Kartenlisten, Zugangsdaten oder Konto-IDs. Die Mengenprüfung ist noch keine Importfreigabe.</p><textarea id="report" readonly aria-label="Diagnosebericht ohne Spielstand"></textarea><button id="downloadReport" type="button" disabled>Diagnosebericht herunterladen</button></section>
+<script>
+'use strict';
+(()=>{
+ const progress=/^(mcp_save_v1|mcp_tcg_save_v1|mcp_live_save_v1|mcp_rewards_v60|mcp_promo_rewards_v1|mcp_decks_v1|mcp_battle_v1|mcp_lorcana(?:_lc\d+)?_save_v1|mcp_(?:op\d+|prb\d+)_save_v1|mcp_op01_test_save_v1)$/;
+ const by=id=>document.getElementById(id),plain=x=>!!x&&typeof x==='object'&&!Array.isArray(x)&&Object.getPrototypeOf(x)===Object.prototype,natural=x=>Number.isSafeInteger(x)&&x>=0;
+ let backup=null,report=null;
+ async function digest(text){return [...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(text)))].map(x=>x.toString(16).padStart(2,'0')).join('');}
+ function download(value,name){const url=URL.createObjectURL(new Blob([JSON.stringify(value,null,2)],{type:'application/json'})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);}
+ function analyze(records){
+  const inventories=[],issues=[];
+  function issue(source,reason,extra={}){issues.push({source,reason,...extra});}
+  function counts(value,source){
+   if(!plain(value)){issue(source,'Kartenmengen sind kein einfaches Objekt',{type:Array.isArray(value)?'array':value===null?'null':typeof value});return;}
+   let copies=0,invalid=0;const groups=new Map();
+   for(const [id,n]of Object.entries(value)){
+    let reason=!id?'Leere Karten-ID':id.length>160?'Karten-ID länger als 160 Zeichen':id.startsWith('mcp_dev_v1:')?'Dev-ID im Gastdatensatz':!natural(n)?'Menge ist keine nichtnegative sichere Ganzzahl':null;
+    if(reason){invalid++;const type=n===null?'null':Array.isArray(n)?'array':typeof n,key=reason+'|'+type;const g=groups.get(key)||{source,reason,type,entries:0,numericString:type==='string'&&/^\d+$/.test(n)};g.entries++;groups.set(key,g);}else copies+=n;
+   }
+   inventories.push({source,entries:Object.keys(value).length,validCopies:copies,invalidEntries:invalid});issues.push(...groups.values());
+  }
+  for(const [key,raw]of Object.entries(records)){
+   let data;try{data=JSON.parse(raw);}catch{issue(key,'Kein gültiges JSON');continue;}
+   if(key==='mcp_tcg_save_v1'||key==='mcp_live_save_v1'){
+    if(!plain(data?.sets)){issue(key,'Sets sind kein einfaches Objekt');continue;}
+    for(const [set,save]of Object.entries(data.sets))counts(save?.owned,key+' / '+set);
+   }else if(key==='mcp_promo_rewards_v1'){for(const world of ['pocket','live'])counts(data?.[world]?.owned,key+' / '+world);}
+   else if(!['mcp_rewards_v60','mcp_decks_v1','mcp_battle_v1'].includes(key))counts(data?.owned,key);
+  }
+  return {format:'mcp-guest-quantity-diagnosis-v1',recordCount:Object.keys(records).length,quantityCheckPassed:issues.length===0,inventories,issues,noStorageWrites:true,noNetworkOrFirebase:true,noAccountOrDevData:true};
+ }
+ by('inspect').onclick=async()=>{
+  backup=null;report=null;by('download').disabled=true;by('downloadReport').disabled=true;by('backupSection').hidden=true;by('reportSection').hidden=true;
+  try{
+   const records={};for(const key of Object.keys(localStorage).sort())if(progress.test(key))records[key]=localStorage.getItem(key);
+   if(!Object.keys(records).length){by('status').textContent='Keine normalen Gastspielstände gefunden. Bitte anhalten und das ursprüngliche Browserprofil prüfen. Es wurde nichts verändert.';return;}
+   const hashes={};for(const [key,raw]of Object.entries(records))hashes[key]=await digest(raw);
+   const keysNow=Object.keys(localStorage).filter(key=>progress.test(key)).sort();if(JSON.stringify(keysNow)!==JSON.stringify(Object.keys(records))||keysNow.some(key=>localStorage.getItem(key)!==records[key])){by('status').textContent='Der Gaststand hat sich während des Lesens geändert. Bitte nicht weiterspielen und die Sicherung erneut vorbereiten. Es wurde nichts verändert.';return;}
+   const recordsDigest=await digest(JSON.stringify(records));backup={format:'mcp-original-guest-raw-v1',createdAt:new Date().toISOString(),origin:location.origin,records,recordSha256:hashes,recordsDigest};
+   report={...analyze(records),recordsDigest};by('report').value=JSON.stringify(report,null,2);by('status').textContent=Object.keys(records).length+' Gastdatensätze unverändert gelesen. '+(report.quantityCheckPassed?'Keine auffälligen Kartenmengen gefunden.':'Mengenstruktur muss vor einer Übernahme geklärt werden.');by('backupSection').hidden=false;by('reportSection').hidden=false;by('download').disabled=false;by('downloadReport').disabled=false;
+  }catch{by('status').textContent='Sicherung konnte nicht vorbereitet werden. Bitte anhalten. Es wurde nichts verändert.';}
+ };
+ by('download').onclick=()=>{if(!backup)return;download(backup,'MonsterCardsPocket-Gast-Original.json');by('backupStatus').textContent='Download angeboten. Bitte prüfen, ob die Datei auf deinem Gerät gespeichert wurde. Noch kein Import.';};
+ by('downloadReport').onclick=()=>{if(report)download(report,'MonsterCardsPocket-Mengen-Diagnose.json');};
+})();
+</script></body></html>
