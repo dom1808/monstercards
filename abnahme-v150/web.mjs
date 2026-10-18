@@ -1,4 +1,4 @@
-import {createIntegration} from './client.mjs?v=2';
+import {createIntegration} from './client.mjs?v=3';
 const $=id=>document.getElementById(id),prefix='mcp_integration_v150:';let account,busy=false;
 function preferences(){try{const p=JSON.parse(localStorage.getItem(prefix+'preferences')||'{}');document.documentElement.dataset.tone=p.tone==='dark'?'dark':'light';$('sound').checked=p.sound===true;$('volume').value=Number.isFinite(p.volume)?Math.max(0,Math.min(100,p.volume)):50;}catch{}$('volume').disabled=!$('sound').checked;}
 function savePreferences(){localStorage.setItem(prefix+'preferences',JSON.stringify({tone:document.documentElement.dataset.tone,sound:$('sound').checked,volume:Number($('volume').value)}));}

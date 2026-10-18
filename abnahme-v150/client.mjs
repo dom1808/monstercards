@@ -51,30 +51,42 @@ class AccountLabor {
     });
   }
   async load() {
-    const uid=this.#user().uid; this.#assert(uid);
-    const snap=await getDocFromServer(this.#ref(uid));
-    if(!snap.exists()) throw Error('Profil fehlt');
-    const m=snap.data(); let data=null;
-    if(m.stage==='active'&&!m.deletionRequested) {
-      const chunks=await Promise.all(Array.from({length:PARTS},(_,i)=>getDocFromServer(this.#ref(uid,'snapshots',String(i)))));
-      if(chunks.some(x=>!x.exists()||x.data().generation!==m.dataRevision)) throw Error('Ladekonflikt: Datenstand '+m.dataRevision+' / Teile '+chunks.map(x=>x.exists()?x.data().generation:'fehlt').join(','));
-      data=await decode(chunks.map(x=>x.data().fragment),m.dataDigest);
+    const uid=this.#user().uid;this.#assert(uid);
+    // Ein verifizierter Server-Lesesatz statt unabhängiger Watch-/Cache-Abfragen.
+    // Validierung erst nach erfolgreicher Transaktion: bei paralleler Änderung
+    // darf Firestore den gesamten Lesesatz wiederholen, bevor Zustand sichtbar wird.
+    const snapshot=await runTransaction(this.db,async tx=>{
+      this.#assert(uid);
+      const profile=await tx.get(this.#ref(uid));
+      if(!profile.exists())throw Error('Profil fehlt');
+      const meta=profile.data();let parts=null;
+      if(meta.stage==='active'&&!meta.deletionRequested){
+        const chunks=await Promise.all(Array.from({length:PARTS},(_,i)=>tx.get(this.#ref(uid,'snapshots',String(i)))));
+        parts=chunks.map(chunk=>chunk.exists()?chunk.data():null);
+      }
+      return {meta,parts};
+    },{maxAttempts:3});
+    this.#assert(uid);
+    const m=snapshot.meta;let data=null;
+    if(m.stage==='active'&&!m.deletionRequested){
+      if(!snapshot.parts||snapshot.parts.some(part=>!part||part.generation!==m.dataRevision))throw Error('Ladekonflikt: Datenstand '+m.dataRevision+' / Teile '+(snapshot.parts||[]).map(part=>part?part.generation:'fehlt').join(','));
+      data=await decode(snapshot.parts.map(part=>part.fragment),m.dataDigest);
       const s=summary(data);
       if(s.day!==(m.dailyDay||'')||(s.gifts['thanks-2026-10']===true)!==(m.giftClaimed===true))throw Error('Belohnungsmarker widersprechen Spielstand');
-      if(s.units!==m.walletUnits || ['pocket','live'].some(w=>data.promos[w].packs!==m.promoPacks[w]||data.promos[w].claimed!==m.promoClaimed[w])) throw Error('Metadaten widersprechen Spielstand');
+      if(s.units!==m.walletUnits||['pocket','live'].some(w=>data.promos[w].packs!==m.promoPacks[w]||data.promos[w].claimed!==m.promoClaimed[w]))throw Error('Metadaten widersprechen Spielstand');
     }
-    // Keine gemischte Generation übernehmen, wenn während des Ladens geschrieben wurde.
-    const current=await getDocFromServer(this.#ref(uid));
-    if(current.data().revision!==m.revision) throw Error('Ladekonflikt: Profilversion '+m.revision+' / aktuell '+current.data().revision);
-    this.#assert(uid); this.cache={uid,meta:m,data};this.mode='account';
+    this.#assert(uid);this.cache={uid,meta:m,data};this.mode='account';
     this.status=this.#lease?.uid===uid&&this.#lease.epoch===m.epoch?'Gespeichert':'Nur Ansicht';
     if(m.deletionRequested){this.#lease=null;this.status='Löschung angefragt · Bearbeitung innerhalb von sieben Tagen';}
     this.#stop?.();
     this.#stop=onSnapshot(this.#ref(uid),snap=>{
-      if(!this.online||this.auth.currentUser?.uid!==uid||!snap.exists())return;
-      if(snap.data().deletionRequested){this.#lease=null;this.cache={uid,meta:snap.data(),data:null};this.status='Löschung angefragt · Bearbeitung innerhalb von sieben Tagen';}
-      else if(this.#lease?.epoch!==snap.data().epoch)this.status='Nur Ansicht';
-      else if(snap.data().revision!==this.cache?.meta.revision)this.status='Stand geändert · neu laden';
+      if(!this.online||this.auth.currentUser?.uid!==uid||!snap.exists()||snap.metadata.hasPendingWrites)return;
+      const observed=snap.data();
+      if(observed.revision<this.cache?.meta.revision)return;
+      if(observed.deletionRequested){this.#lease=null;this.cache={uid,meta:observed,data:null};this.status='Löschung angefragt · Bearbeitung innerhalb von sieben Tagen';}
+      else if(this.#lease?.uid!==uid||this.#lease.epoch!==observed.epoch)this.status='Nur Ansicht';
+      else if(observed.revision!==this.cache?.meta.revision)this.status='Stand geändert · neu laden';
+      else this.status='Gespeichert';
       this.onChange?.();
     },()=>{this.status='Zugriff unterbrochen · nur Ansicht';this.onChange?.();});
     return clone(this.cache);
