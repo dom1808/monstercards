@@ -6,8 +6,22 @@ export const clone = x => structuredClone(x);
 const plain = x => !!x && typeof x==='object' && !Array.isArray(x) && Object.getPrototypeOf(x)===Object.prototype;
 const natural = x => Number.isSafeInteger(x) && x>=0;
 function keys(x, allowed) { if (!plain(x) || Object.keys(x).some(k=>!allowed.includes(k)) || allowed.some(k=>!Object.hasOwn(x,k))) throw Error('Ungültige Struktur'); }
-function counts(x) { if(!plain(x) || Object.entries(x).some(([k,v])=>!k || k.length>160 || k.startsWith('mcp_dev_v1:') || !natural(v))) throw Error('Ungültige Kartenmengen'); }
-function pack(x) { keys(x,['owned','packs']); counts(x.owned); if(!natural(x.packs)) throw Error('Ungültige Packzahl'); }
+// Der Katalog hängt bei Bild-ID-Kollisionen den vollständigen UTF-8-Fingerprint an.
+// Diese IDs bleiben unverändert. Ausnahme nur im zugehörigen One-Piece-Set;
+// andere IDs behalten 160 Zeichen, Daten-/Fragmentbudgets bleiben bestehen.
+function sourcePrintId(id,setId) {
+  if(typeof setId!=='string'||!/^(?:op|prb)\d+$/.test(setId)||id.length>512||!id.startsWith(setId+'-')) return false;
+  const match=/^([A-Za-z0-9_.-]+)_source_([a-f0-9]+)$/.exec(id.slice(setId.length+1));
+  if(!match||match[2].length%2) return false;
+  try {
+    const text=new TextDecoder('utf-8',{fatal:true}).decode(Uint8Array.from(match[2].match(/../g),h=>parseInt(h,16)));
+    const fingerprint=JSON.parse(text);
+    return Array.isArray(fingerprint)&&fingerprint.length===4&&fingerprint.every(v=>typeof v==='string'&&v.length>0)
+      && JSON.stringify(fingerprint)===text&&!text.includes('mcp_dev_v1:');
+  } catch { return false; }
+}
+function counts(x,setId=null) { if(!plain(x) || Object.entries(x).some(([k,v])=>!k || k.length>160&&!sourcePrintId(k,setId) || k.startsWith('mcp_dev_v1:') || !natural(v))) throw Error('Ungültige Kartenmengen'); }
+function pack(x,setId=null) { keys(x,['owned','packs']); counts(x.owned,setId); if(!natural(x.packs)) throw Error('Ungültige Packzahl'); }
 export function validate(data) {
   keys(data,['schema','collections','wallet','promos','aux']);keys(data.aux,['decks','battle']);for(const v of Object.values(data.aux))if(v!==null&&!plain(v))throw Error('Ungültiger Zusatzspielstand');
   if(data.schema!==2) throw Error('Unbekanntes Schema');
@@ -15,7 +29,7 @@ export function validate(data) {
   for(const world of ['pocket','live','lorcana','onepiece']) {
     keys(data.collections[world],['sets']);
     if(!plain(data.collections[world].sets)) throw Error('Ungültige Sets');
-    for(const [id,set] of Object.entries(data.collections[world].sets)) { if(!id || id.length>160 || id.includes('mcp_dev_v1:')) throw Error('Ungültige Set-ID'); pack(set); }
+    for(const [id,set] of Object.entries(data.collections[world].sets)) { if(!id || id.length>160 || id.includes('mcp_dev_v1:')) throw Error('Ungültige Set-ID'); pack(set,world==='onepiece'?id:null); }
   }
   keys(data.wallet,['v','units','lastDay','gifts']);
   if(data.wallet.v!==1 || !natural(data.wallet.units) || typeof data.wallet.lastDay!=='string' || !plain(data.wallet.gifts) || Object.values(data.wallet.gifts).some(v=>v!==true)) throw Error('Ungültiges Wallet');
