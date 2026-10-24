@@ -10,8 +10,8 @@ Versionsinformationen stammen aus quellen/release-notes.json.
 Projekt: README.md; verbindliche Arbeitsregeln: AGENTS.md. -->
 <meta name="application-name" content="Monster Cards Pocket">
 <meta name="description" content="Monster Cards Pocket – Packs öffnen und Karten sammeln in fünf Kartenwelten.">
-<meta name="mcp-version" content="v1.6.1">
-<meta name="mcp-release-date" content="2026-10-23">
+<meta name="mcp-version" content="v1.6.2">
+<meta name="mcp-release-date" content="2026-10-24">
 <!-- MCP-GITHUB-INFO:END -->
 
 <meta charset="utf-8"/>
@@ -79,7 +79,7 @@ const mcpStorage=(()=>{
 </script>
 <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/>
 <meta content="noindex, nofollow" name="robots"/>
-<title>Monster Cards Pocket · v1.6.1</title>
+<title>Monster Cards Pocket · v1.6.2</title>
 <!-- MCP-INSTALL:START -->
 <link rel="manifest" href="./manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="./assets/app-icons/mcp-192.png">
@@ -1576,7 +1576,7 @@ body.an-ready #app>main.v150-page-host{display:flex;min-height:0;overflow:hidden
   <div class="start-world-heading"><h2>Deine Kartenwelten</h2><span>Fortschritt je Set · jede Druckversion zählt</span></div>
   <div id="startWorlds" class="start-worlds"></div>
   <div class="start-bottom">
-   <section class="start-notes" aria-labelledby="startNotesTitle"><div class="start-note-heading"><h2 id="startNotesTitle">Zuletzt neu · v1.6.1</h2><span>23. Oktober 2026</span></div><ul><li><strong>Die Stadt Hyperia</strong> – Lorcana wächst um das neue Set „Die Stadt Hyperia“ mit 242 deutschen Kartenmotiven. Das Set ist im Album, in der Setauswahl und beim Öffnen von Boostern und Premiumdisplays verfügbar.</li><li><strong>Tokeninformationen und Navigation</strong> – Dein exaktes Guthaben, Packkosten und Hinweise zum Spielstand haben eine eigene Infoseite mit Rückweg. Aus Profil, Tauschwerkstatt und Tokeninformationen erreichst du auch die Promo-Alben und die übrigen Hauptbereiche direkt.</li><li><strong>Praktischeres Profil und Tauschwerkstatt</strong> – Theme und Ton sind im Profil direkt erreichbar. Die aktive Token-Kartensteuerung sitzt unter dem Kartenraster und verschwindet bei Abwahl. Pocket und TCG Live merken sich ihr zuletzt gewähltes Promo-Album getrennt.</li></ul><button type="button" class="start-history-button" id="versionHistoryOpen" aria-haspopup="dialog" aria-controls="versionHistoryDialog">Alle Neuerungen ansehen <span class="release-new" id="versionHistoryNew">Neu</span></button></section>
+   <section class="start-notes" aria-labelledby="startNotesTitle"><div class="start-note-heading"><h2 id="startNotesTitle">Zuletzt neu · v1.6.2</h2><span>24. Oktober 2026</span></div><ul><li><strong>Gemeinsame Selten-Gruppe in TCG Live</strong> – In 15 aktuellen Live-Sets gehören seltene und holo-seltene Karten gemeinsam zu „Selten“. Albumfilter, Sammelbooster und Wunschtausch verwenden dieselbe Gruppe. Jede abgegebene Dublette bringt 0,08 Token; ihre Kartenkennung und Holo-Merkmale bleiben erhalten.</li><li><strong>Angepasste Sammelbooster</strong> – Die Chancen der betroffenen Live-Sammelbooster sind auf die gemeinsame Selten-Gruppe abgestimmt. Weiße Flammen erhält einen zusätzlichen Selten-Anteil. Höhere Seltenheiten, Premiumgarantien und die geschützte letzte Kopie bleiben erhalten.</li><li><strong>Black White Rare gezielt tauschen</strong> – Die vier Black-White-Rare-Karten aus Schwarze Blitze und Weiße Flammen bringen je abgegebener Dublette 2 Token. Ihr Wunschtausch bleibt in einer eigenen Gruppe. Bereits gebuchte Token und vorhandene Sammlungen werden nicht nachträglich verändert.</li></ul><button type="button" class="start-history-button" id="versionHistoryOpen" aria-haspopup="dialog" aria-controls="versionHistoryDialog">Alle Neuerungen ansehen <span class="release-new" id="versionHistoryNew">Neu</span></button></section>
    <div class="start-preference"><label for="startDestination">Beim Start der App</label><select id="startDestination"><option value="home">Meine Kartenwelten anzeigen</option><option value="last">Im letzten Bereich fortsetzen</option></select><p>Du erreichst diese Seite jederzeit über „Start“.</p><span id="startPreferenceStatus" role="status"></span></div>
   </div>
  </div>
@@ -4896,7 +4896,7 @@ Object.assign(RANK,{TS:5,TPR:3,TAM:4,TMA:4,TBW:5,TN:0,TU:0});
 function mapRarityLive(r){
  const key=String(r==null?'':r).trim().toLowerCase().replace(//g,'').replace(/\s+/g,' ');
  if(!key)return 'TU';
- if(LIVE_RARITY_ALIASES[key])return LIVE_RARITY_ALIASES[key];
+ if(Object.hasOwn(LIVE_RARITY_ALIASES,key))return LIVE_RARITY_ALIASES[key];
  const legacy=mapRarityLiveLegacy(r);
  if(legacy==='T1'&&!/^(common|häufig)$/.test(key))return 'TU';
  return legacy;
@@ -4904,7 +4904,7 @@ function mapRarityLive(r){
 // Application-model families, not measured or official rarity-specific rates.
 const LIVE_POOL_FAMILIES={TS:'T8',TPR:'T4',TAM:'T4',TMA:'T5',TBW:'T8'};
 function livePoolCoverage(st, booster){
- const cards=st.cards.filter(c=>!booster||!c.b||!c.b.length||c.b.includes(booster));
+ const cards=st.cards.filter(c=>!c.drawBlocked&&(!booster||!c.b||!c.b.length||c.b.includes(booster)));
  const by={},gallery=new Set(cards.filter(c=>['TG','GG','TC','SVT'].includes(c.r)));
  cards.forEach(c=>{const key=c.poolRarity||c.r;(by[key]=by[key]||[]).push(c);});
  by['*']=cards.filter(c=>!gallery.has(c));
@@ -4934,15 +4934,16 @@ function liveFinalizeRarities(st){
  st.poolVersion='v59-family-1';st.rarityBridgeCount=0;st.poolChanges=0;st.poolFallbacks=[];
  const hasSlot=key=>st.prof.slots.some(tb=>Object.entries(tb).some(([k,w])=>k!=='__fb'&&w>0&&(k==='*'||k.split('|').includes(key))));
  st.cards.forEach(c=>{
-  c.semanticRarity=mapRarityLive(c.rw);
+  c.semanticRarity=st.liveRarityPolicy?.merged?liveContextRarity(st,c):mapRarityLive(c.rw);
   let legacy=mapRarityLiveLegacy(c.rw);
   if(c.hv&&legacy==='T3')legacy='TH';
   if(st.prof&&st.prof.classify){const k=st.prof.classify(c);if(k)legacy=k;}
   if(c.cc)legacy='TC';else if(c.g)legacy=c.g;
   c.legacyPoolRarity=legacy;
-  c.poolRarity=['TN','TU'].includes(c.r)?legacy:(LIVE_POOL_FAMILIES[c.r]||c.r);
+  c.poolRarity=c.drawBlocked?null:['TN','TU'].includes(c.r)?legacy:(LIVE_POOL_FAMILIES[c.r]||c.r);
   c.rarityWarnings=[];
   if(c.semanticRarity==='TU')c.rarityWarnings.push('unknown_source_rarity');
+  if(c.drawBlocked)c.rarityWarnings.push(st.profileUnavailable?'set_profile_requires_approval':'unresolved_rarity_excluded_from_draw');
   if(['TN','TU'].includes(c.r))c.rarityWarnings.push('unclassified_legacy_pool_retained');
   if(LIVE_POOL_FAMILIES[c.r])c.rarityWarnings.push('app_model_shared_family_no_official_rarity_rate');
   if(c.r==='T9'&&!hasSlot('T9')&&hasSlot('T4')){c.poolRarity='T4';c.rarityWarnings.push('ace_spec_uses_special_pool_no_dedicated_slot');st.poolFallbacks.push({id:c.id,rarity:c.r,pool:c.poolRarity});}
@@ -4952,7 +4953,1317 @@ function liveFinalizeRarities(st){
   const number=String(c.l==null?'':c.l),official=Number(st.official);
   c.setRegion=c.g||c.cc?'gallery':/^\d+$/.test(number)&&Number.isInteger(official)&&official>0?(Number(number)>official?'overnumbered':'base'):'unknown';
  });
+ if(st.liveRarityPolicy?.merged){st.rarityVersion=LIVE_MERGED_RARE.version;st.poolVersion=LIVE_MERGED_RARE.version;}
  st.poolCoverage=livePoolCoverage(st);
+}
+
+// Approved 24.10.2026: semantic rarity is independent of physical holo variants.
+const LIVE_MERGED_RARE={
+  "version": "merged-rare-b-20261024",
+  "basis": {
+    "path": "berechnungen.json",
+    "sha256": "be20dee8ae9e8fe811c9d97bd0802981af68bcddc31c5052c5dcba741f2b6352"
+  },
+  "profiles": {
+    "sv03": {
+      "name": "Obsidian Flammen",
+      "series": "sv",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 2.923976608187134,
+          "T1|T2": 97.07602339181295
+        },
+        {
+          "T6": 7.670000000000003,
+          "T7": 4.800000000000001,
+          "T3": 2.4716374269005845,
+          "T8": 3.000000000000001,
+          "T1|T2": 82.05836257309956,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 10.338461538461539,
+          "T3": 83.09153846153845,
+          "T5": 6.570000000000001,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [
+        {
+          "slot": 7,
+          "pool": "T7",
+          "from": 2.4,
+          "to": 4.8
+        },
+        {
+          "slot": 7,
+          "pool": "T8",
+          "from": 1.5,
+          "to": 3
+        }
+      ],
+      "sourceRareCount": 10
+    },
+    "sv05": {
+      "name": "Gewalten der Zeit",
+      "series": "sv",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 5.2631578947368425,
+          "T1|T2": 94.73684210526324
+        },
+        {
+          "T6": 7.67,
+          "T7": 2.3200000000000003,
+          "T3": 4.398421052631579,
+          "T8": 1.44,
+          "T9": 5,
+          "T1|T2": 79.17157894736839,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 8.113636363636363,
+          "T3": 85.31636363636362,
+          "T5": 6.570000000000002,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [
+        {
+          "slot": 7,
+          "pool": "T7",
+          "from": 1.16,
+          "to": 2.32
+        },
+        {
+          "slot": 7,
+          "pool": "T8",
+          "from": 0.72,
+          "to": 1.44
+        }
+      ],
+      "sourceRareCount": 14
+    },
+    "sv06": {
+      "name": "Maskerade im Zwielicht",
+      "series": "sv",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 4.37956204379562,
+          "T1|T2": 95.62043795620427
+        },
+        {
+          "T6": 7.670000000000002,
+          "T7": 3.599999999999999,
+          "T3": 3.561897810218978,
+          "T8": 2.4,
+          "T9": 5,
+          "T1|T2": 77.76810218978102,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 7.291666666666665,
+          "T3": 86.13833333333334,
+          "T5": 6.570000000000002,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [
+        {
+          "slot": 7,
+          "pool": "T7",
+          "from": 1.8,
+          "to": 3.6
+        },
+        {
+          "slot": 7,
+          "pool": "T8",
+          "from": 1.2,
+          "to": 2.4
+        }
+      ],
+      "sourceRareCount": 16
+    },
+    "sv07": {
+      "name": "Stellarkrone",
+      "series": "sv",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 3.508771929824561,
+          "T1|T2": 96.49122807017531
+        },
+        {
+          "T6": 7.669999999999999,
+          "T7": 3.8000000000000003,
+          "T3": 2.839649122807018,
+          "T8": 2.6000000000000005,
+          "T9": 5.000000000000001,
+          "T1|T2": 78.09035087719309,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 7.112,
+          "T3": 86.31800000000001,
+          "T5": 6.570000000000003,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [
+        {
+          "slot": 7,
+          "pool": "T7",
+          "from": 1.9,
+          "to": 3.8
+        },
+        {
+          "slot": 7,
+          "pool": "T8",
+          "from": 1.3,
+          "to": 2.6
+        }
+      ],
+      "sourceRareCount": 15
+    },
+    "sv08": {
+      "name": "Stürmische Funken",
+      "series": "sv",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 2.6143790849673203,
+          "T1|T2": 97.3856209150326
+        },
+        {
+          "T6": 7.670000000000004,
+          "T7": 2.6,
+          "T3": 2.1681045751633987,
+          "T8": 1.8000000000000003,
+          "T9": 5.000000000000001,
+          "T1|T2": 80.76189542483657,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 7.080000000000003,
+          "T3": 86.35,
+          "T5": 6.570000000000002,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [
+        {
+          "slot": 7,
+          "pool": "T7",
+          "from": 1.3,
+          "to": 2.6
+        },
+        {
+          "slot": 7,
+          "pool": "T8",
+          "from": 0.9,
+          "to": 1.8
+        }
+      ],
+      "sourceRareCount": 16
+    },
+    "sv09": {
+      "name": "Reisegefährten",
+      "series": "sv",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 4.511278195488722,
+          "T1|T2": 95.48872180451136
+        },
+        {
+          "T6": 7.67,
+          "T7": 3.15,
+          "T3": 3.939699248120301,
+          "T8": 1.85,
+          "T1|T2": 83.39030075187979,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 8.467692307692307,
+          "T3": 84.9623076923077,
+          "T5": 6.570000000000003,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [],
+      "sourceRareCount": 16
+    },
+    "sv10": {
+      "name": "Ewige Rivalen",
+      "series": "sv",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 3.2894736842105265,
+          "T1|T2": 96.71052631578942
+        },
+        {
+          "T6": 7.6700000000000035,
+          "T7": 3.1499999999999995,
+          "T3": 2.872697368421053,
+          "T8": 1.85,
+          "T1|T2": 84.45730263157901,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 7.797333333333334,
+          "T3": 85.63266666666667,
+          "T5": 6.570000000000003,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [],
+      "sourceRareCount": 18
+    },
+    "sv10.5b": {
+      "name": "Schwarze Blitze",
+      "series": "sv",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 1.408450704225352,
+          "T1|T2": 98.59154929577464
+        },
+        {
+          "T6": 7.670000000000004,
+          "T7": 3.1500000000000004,
+          "T3": 1.23,
+          "T8": 1.85,
+          "T1|T2": 86.09999999999997,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 5.5040000000000004,
+          "T3": 87.926,
+          "T5": 6.570000000000001,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [],
+      "sourceRareCount": 10
+    },
+    "sv10.5w": {
+      "name": "Weiße Flammen",
+      "series": "sv",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T1|T2": 100.00000000000001
+        },
+        {
+          "T6": 7.670000000000008,
+          "T7": 3.1500000000000004,
+          "T8": 1.85,
+          "T1|T2": 87.32999999999997,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 5.160000000000001,
+          "T3": 88.27000000000004,
+          "T5": 6.570000000000001,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [],
+      "sourceRareCount": 10
+    },
+    "me01": {
+      "name": "Mega-Entwicklung",
+      "series": "me",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 4.3478260869565215,
+          "T1|T2": 95.6521739130435
+        },
+        {
+          "T6": 10.889999999999997,
+          "T7": 1.9799999999999998,
+          "T3": 3.781304347826087,
+          "TM": 0.15999999999999998,
+          "T1|T2": 83.18869565217392,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 12.300000000000002,
+          "T3": 79.47,
+          "T5": 8.23,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [
+        {
+          "slot": 7,
+          "pool": "T7",
+          "from": 0.99,
+          "to": 1.98
+        },
+        {
+          "slot": 7,
+          "pool": "TM",
+          "from": 0.08,
+          "to": 0.16
+        }
+      ],
+      "sourceRareCount": 12
+    },
+    "me02": {
+      "name": "Fatale Flammen",
+      "series": "me",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 5.128205128205129,
+          "T1|T2": 94.87179487179492
+        },
+        {
+          "T6": 7.669999999999999,
+          "T7": 3.15,
+          "T3": 4.478461538461539,
+          "T8": 1.85,
+          "T1|T2": 82.85153846153852,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 8.600000000000001,
+          "T3": 84.83000000000001,
+          "T5": 6.570000000000003,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [],
+      "sourceRareCount": 10
+    },
+    "me02.5": {
+      "name": "Erhabene Helden",
+      "series": "me",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 1.2903225806451613,
+          "T1|T2": 98.70967741935496
+        },
+        {
+          "T6": 7.67,
+          "T7": 3.1499999999999986,
+          "T3": 1.1268387096774193,
+          "T8": 1.85,
+          "T1|T2": 86.20316129032256,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 8.65548387096774,
+          "T3": 84.77451612903226,
+          "T5": 6.570000000000002,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [],
+      "sourceRareCount": 25
+    },
+    "me03": {
+      "name": "Optimale Ordnung",
+      "series": "me",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 12.820512820512823,
+          "T1|T2": 87.17948717948721
+        },
+        {
+          "T6": 7.67,
+          "T7": 3.15,
+          "T3": 11.196153846153846,
+          "T8": 1.85,
+          "T1|T2": 76.1338461538462,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 12.383999999999999,
+          "T3": 81.04599999999999,
+          "T5": 6.570000000000003,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [],
+      "sourceRareCount": 11
+    },
+    "me04": {
+      "name": "Wachsendes Chaos",
+      "series": "me",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 7.246376811594203,
+          "T1|T2": 92.75362318840583
+        },
+        {
+          "T6": 7.67,
+          "T7": 3.15,
+          "T3": 6.328260869565217,
+          "T8": 1.85,
+          "T1|T2": 81.00173913043483,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 8.094117647058825,
+          "T3": 85.33588235294117,
+          "T5": 6.570000000000003,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [],
+      "sourceRareCount": 12
+    },
+    "me05": {
+      "name": "Dunkelnacht",
+      "series": "me",
+      "slots": [
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T1": 100,
+          "__fb": [
+            "T2"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T2": 100,
+          "__fb": [
+            "T1"
+          ]
+        },
+        {
+          "T3": 7.352941176470589,
+          "T1|T2": 92.64705882352935
+        },
+        {
+          "T6": 7.67,
+          "T7": 3.15,
+          "T3": 6.421323529411764,
+          "T8": 1.85,
+          "T1|T2": 80.90867647058822,
+          "__fb": [
+            "T1",
+            "T2"
+          ]
+        },
+        {
+          "T4": 8.600000000000001,
+          "T3": 84.83,
+          "T5": 6.570000000000003,
+          "__fb": [
+            "T3",
+            "T2"
+          ]
+        }
+      ],
+      "x2Changes": [],
+      "sourceRareCount": 11
+    }
+  },
+  "existingSetIds": [
+    "base1",
+    "base2",
+    "basep",
+    "base3",
+    "base5",
+    "neo1",
+    "neo2",
+    "neo3",
+    "neo4",
+    "ecard1",
+    "ecard2",
+    "ecard3",
+    "ex1",
+    "ex2",
+    "ex3",
+    "ex4",
+    "ex6",
+    "ex8",
+    "ex9",
+    "exu",
+    "ex10",
+    "ex11",
+    "ex12",
+    "ex13",
+    "ex14",
+    "ex15",
+    "ex16",
+    "dpp",
+    "dp1",
+    "dp2",
+    "dp3",
+    "dp4",
+    "dp5",
+    "dp6",
+    "dp7",
+    "pl1",
+    "pl2",
+    "pl3",
+    "pl4",
+    "hgss1",
+    "hgssp",
+    "hgss2",
+    "hgss3",
+    "hgss4",
+    "col1",
+    "bw1",
+    "bwp",
+    "bw2",
+    "bw3",
+    "bw4",
+    "bw5",
+    "bw6",
+    "dv1",
+    "bw7",
+    "bw8",
+    "bw9",
+    "bw10",
+    "xyp",
+    "xy0",
+    "xy1",
+    "xya",
+    "xy2",
+    "xy3",
+    "xy4",
+    "xy5",
+    "xy6",
+    "xy7",
+    "xy8",
+    "xy9",
+    "g1",
+    "xy10",
+    "xy11",
+    "xy12",
+    "smp",
+    "sm1",
+    "sm2",
+    "sm3",
+    "sm3.5",
+    "sm4",
+    "sm5",
+    "sm6",
+    "sm7",
+    "sm7.5",
+    "sm8",
+    "sm9",
+    "det1",
+    "sm10",
+    "sm11",
+    "sm115",
+    "sma",
+    "sm12",
+    "swshp",
+    "swsh1",
+    "swsh2",
+    "swsh3",
+    "swsh3.5",
+    "swsh4",
+    "swsh4.5sv",
+    "swsh4.5",
+    "swsh5",
+    "swsh6",
+    "swsh7",
+    "cel25",
+    "cel25cc",
+    "swsh8",
+    "swsh9tg",
+    "swsh9",
+    "swsh10tg",
+    "swsh10",
+    "swsh10.5",
+    "swsh11",
+    "swsh11tg",
+    "swsh12tg",
+    "swsh12",
+    "swsh12.5gg",
+    "swsh12.5",
+    "sv01",
+    "sve",
+    "svp",
+    "sv02",
+    "sv03",
+    "sv03.5",
+    "sv04",
+    "sv04.5",
+    "sv05",
+    "sv06",
+    "sv06.5",
+    "sv07",
+    "A1",
+    "P-A",
+    "sv08",
+    "A1a",
+    "sv08.5",
+    "A2",
+    "A2a",
+    "A2b",
+    "sv09",
+    "A3",
+    "sv10",
+    "sv10.5w",
+    "sv10.5b",
+    "A4a",
+    "mee",
+    "mep",
+    "me01",
+    "me02",
+    "B1a",
+    "B2",
+    "me02.5",
+    "B2a",
+    "me03",
+    "me04",
+    "me05",
+    "30th-c",
+    "30th",
+    "miscp",
+    "wp",
+    "jumbo",
+    "base4",
+    "gym1",
+    "gym2",
+    "si1",
+    "lc",
+    "sp",
+    "bog",
+    "np",
+    "ex5",
+    "ex5.5",
+    "tk-ex-latia",
+    "tk-ex-latio",
+    "pop1",
+    "ex7",
+    "pop2",
+    "tk-ex-p",
+    "tk-ex-m",
+    "pop3",
+    "pop4",
+    "pop5",
+    "tk-dp-l",
+    "tk-dp-m",
+    "pop6",
+    "pop7",
+    "pop8",
+    "pop9",
+    "ru1",
+    "tk-hs-r",
+    "tk-hs-g",
+    "2011bw",
+    "tk-bw-e",
+    "tk-bw-z",
+    "2012bw",
+    "bw11",
+    "rc",
+    "tk-xy-sy",
+    "tk-xy-n",
+    "2014xy",
+    "tk-xy-b",
+    "tk-xy-w",
+    "dc1",
+    "tk-xy-latia",
+    "tk-xy-latio",
+    "2015xy",
+    "tk-xy-su",
+    "tk-xy-p",
+    "2016xy",
+    "tk-sm-l",
+    "tk-sm-r",
+    "2017sm",
+    "2018sm",
+    "2019sm",
+    "fut2020",
+    "2021swsh",
+    "2022swsh",
+    "2023sv",
+    "mfb",
+    "2024sv",
+    "A3a",
+    "A3b",
+    "A4",
+    "B1"
+  ],
+  "sourceAliases": {
+    "häufig": "T1",
+    "ungewöhnlich": "T2",
+    "doppelselten": "T4",
+    "selten": "T3",
+    "selten, illustration": "T6",
+    "ultra selten": "T5",
+    "selten, besondere illustration": "T7",
+    "hyperselten": "T8",
+    "ass-klasse": "T9",
+    "schwarz-weiß selten": "TBW",
+    "mega hyper selten": "TM",
+    "mega attack rare": "TMA",
+    "common": "T1",
+    "uncommon": "T2",
+    "rare": "T3",
+    "holo rare": "T3",
+    "rare holo": "T3",
+    "holo-selten": "T3",
+    "holografisch selten": "T3",
+    "double rare": "T4",
+    "illustration rare": "T6",
+    "ultra rare": "T5",
+    "special illustration rare": "T7",
+    "hyper rare": "T8",
+    "mega hyper rare": "TM",
+    "ace spec": "T9",
+    "black white rare": "TBW",
+    "ace spec rare": "T9",
+    "rare ultra": "T5"
+  },
+  "tbwIds": [
+    "sv10.5b-171",
+    "sv10.5b-172",
+    "sv10.5w-172",
+    "sv10.5w-173"
+  ]
+};
+function liveRarityPolicy(st){
+ if(Object.hasOwn(LIVE_MERGED_RARE.profiles,st.id))return {merged:true,reviewed:true};
+ if(LIVE_MERGED_RARE.existingSetIds.includes(st.id))return {merged:false,reviewed:false};
+ const m=st.sourceSetIdentity;
+ const verified=m?.provider==='tcgdex'&&m.id===st.id&&['sv','me'].includes(m.series)
+  &&new RegExp('^'+m.series+'\\d+(?:\\.\\d+[a-z]?)?$','i').test(st.id);
+ return {merged:!!verified,reviewed:false,pendingProfile:true};
+}
+function liveContextRarity(st,c){
+ if(!st.liveRarityPolicy?.merged){let r=c.rw===undefined?c.r:mapRarityLive(c.rw);return c.hv&&r==='T3'?'TH':r;}
+ const key=String(c.rw??'').trim().toLowerCase().replace(/\s+/g,' ');
+ const r=Object.hasOwn(LIVE_MERGED_RARE.sourceAliases,key)?LIVE_MERGED_RARE.sourceAliases[key]:Object.hasOwn(LIVE_RARITY_ALIASES,key)?LIVE_RARITY_ALIASES[key]:'TU';return r==='TH'?'T3':r;
+}
+function livePrepareRarity(st){
+ st.liveRarityPolicy=liveRarityPolicy(st);st.profileUnavailable=!!st.liveRarityPolicy.pendingProfile;
+ for(const c of st.cards){c.r=liveContextRarity(st,c);c.drawBlocked=!!st.liveRarityPolicy.merged&&['TU','TN'].includes(c.r)||st.profileUnavailable;}
+}
+function liveApprovedProfile(st){
+ if(!Object.hasOwn(LIVE_MERGED_RARE.profiles,st.id))return null;
+ const record=LIVE_MERGED_RARE.profiles[st.id];
+ return {name:record.name+' · freigegebener Selten-Pool B',src:'Freigegebenes MCP-Webapp-Modell vom 24.10.2026: bisherige effektive Grundchancen erhalten; Weiße Flammen mit eigener Selten-Korrektur. Keine offiziellen Pull-Rates. Besitzabhängiger 50-%-Duplikatschutz.',
+  slots:JSON.parse(JSON.stringify(record.slots)),collectorPack:true,x2Applied:true,x2Changes:record.x2Changes,mergedRare:true,perPack:[]};
+}
+function liveMergedContextKey(key){if(!key?.startsWith('mcp_live_save_v1:'))return false;const id=key.slice('mcp_live_save_v1:'.length);return Object.hasOwn(LIVE_MERGED_RARE.profiles,id)||(typeof LIVE==='object'&&LIVE.set?.id===id&&LIVE.set.liveRarityPolicy?.merged);}
+function liveNormalizeRarityFilter(raw){
+ if(!raw)return raw;const copy={...raw};if(copy.threshold==='TH')copy.threshold='T3';
+ if(Array.isArray(copy.categories))copy.categories=[...new Set(copy.categories.map(r=>r==='TH'?'T3':r))];
+ if(copy.minRank===3)copy.minRank=2;return copy;
 }
 
 function createExt(cfg){
@@ -5021,7 +6332,7 @@ if (cfg.source){ const out = await cfg.source.set(id, sv.lang, sets, progress); 
 const d = await api('/sets/' + encodeURIComponent(id));
 const brief = d.cards || [];
 const out = {id:d.id, name:d.name, logo:d.logo || (sv.series && !cfg.fixedSeries ? `https://assets.tcgdex.net/${sv.lang}/${sv.series}/${d.id}/logo` : ''), official:(d.cardCount||{}).official||brief.length,
-boosters:(d.boosters||[]).map(b => ({id:b.id||b.name, name:b.name||b.id})), cards:[]};
+boosters:(d.boosters||[]).map(b => ({id:b.id||b.name, name:b.name||b.id})), sourceSetIdentity:{provider:'tcgdex',id:d.id,series:d.serie?.id||'',releaseDate:d.releaseDate||''}, cards:[]};
 let done = 0, i = 0;
 const worker = async () => {
 while (i < brief.length){
@@ -5084,7 +6395,8 @@ out.cards.push(...o.list); out.galleries.push({id:sid, type:o.type, src:'pokemon
 }
 function prepare(st){
 if(cfg.prepare)cfg.prepare(st);
-if (cfg.remap) st.cards.forEach(c => { if (c.rw !== undefined) c.r = cfg.mapRarity(c.rw); if (c.hv && c.r === 'T3') c.r = 'TH'; });
+if (cfg.prefix==='tl') livePrepareRarity(st);
+else if (cfg.remap) st.cards.forEach(c => { if (c.rw !== undefined) c.r = cfg.mapRarity(c.rw); if (c.hv && c.r === 'T3') c.r = 'TH'; });
 st.prof = cfg.profileFor(st);
 if (st.prof.classify) st.cards.forEach(c => { const k = st.prof.classify(c); if (k) c.r = k; });
 st.cards.forEach(c => { if (c.cc) c.r = 'TC'; else if (c.g) c.r = c.g; });
@@ -5100,7 +6412,7 @@ const status = h => { el('Status').innerHTML = h; };
 const progress = (done, total) => status(`Lade Kartendaten von ${cfg.srcName} … ${done}/${total}<div class="bar" style="margin-top:6px"><i style="width:${done/total*100}%"></i></div>`);
 const failMsg = e => `<span class="err">✗ ${cfg.srcName} konnte nicht geladen werden (${esc(e.message || String(e))}). Prüfe deine Internetverbindung. In geteilten Vorschauen sind Abrufe oft gesperrt – öffne die Datei dann direkt im Browser.</span>`;
 function toCard(c){
-const card = {ext:true, mod:api_, id:c.id, localId:c.cc ? 'CC '+(c.printedNumber||c.l) : c.l, name:c.n, img:c.img, rar:c.r, poolRarity:c.poolRarity||c.r, semanticRarity:c.semanticRarity||c.r, sourceRarity:c.rw, variants:c.variants||null, rarityWarnings:c.rarityWarnings||[], setRegion:c.setRegion||null, cat:c.c, b:c.b, setName:set.name, official:set.official, lang:sv.lang};
+const card = {ext:true, mod:api_, packEligible:!c.drawBlocked,catalogOnly:!!c.drawBlocked, physicalHolo:!!c.hv, id:c.id, localId:c.cc ? 'CC '+(c.printedNumber||c.l) : c.l, name:c.n, img:c.img, rar:c.r, poolRarity:c.poolRarity||c.r, semanticRarity:c.semanticRarity||c.r, sourceRarity:c.rw, variants:c.variants||null, rarityWarnings:c.rarityWarnings||[], setRegion:c.setRegion||null, cat:c.c, b:c.b, setName:set.name, official:set.official, lang:sv.lang};
 card.imgs = [...new Set(cfg.imgs(c, set, sv).filter(Boolean))];
 card.st = set; EXT_BY_ID[c.id] = card; return card;
 }
@@ -5109,7 +6421,7 @@ const allCards = () => set ? set.cards.map(known) : [];
 function pool(){
 const bo = sv.booster;
 const effective=cfg.prepare===celebrationPrepare&&set&&set.id==='30th'?(bo||'regular'):bo;
-return set ? set.cards.filter(c => !effective || !c.b.length || c.b.includes(effective)).map(known) : [];
+return set ? set.cards.filter(c => !c.drawBlocked&&(!effective || !c.b.length || c.b.includes(effective))).map(known) : [];
 }
 function draw(batchSeen){
 if(cfg.draw)return cfg.draw(set,pool(),setSave(set.id).owned,batchSeen);
@@ -5226,7 +6538,7 @@ function render(){
 if(cfg.prepare===celebrationPrepare&&set&&set.id==='30th')sv.booster='regular';
 renderHead();
 const ok = !!set && !loading;
-el('Open').disabled = el('Open10').disabled = !ok;
+el('Open').disabled = el('Open10').disabled = !ok||!!set?.profileUnavailable;
 if (!ok){ el('Grid').innerHTML = `<div class="empty">${loading ? 'Set wird geladen …' : 'Kein Set geladen – bitte im Reiter „Packs“ ein Set wählen bzw. neu laden.'}</div>`; el('Stats').innerHTML = ''; el('Prog').innerHTML = ''; el('Pack').innerHTML = ''; el('Odds').innerHTML = ''; el('Info').textContent = ''; return; }
 el('Pack').innerHTML = packHTMLx();
 el('Odds').innerHTML = oddsHTML();
@@ -5235,10 +6547,12 @@ if(cfg.poolAudit){const coverage=cfg.poolAudit(set,set.id==='30th'?(sv.booster||
 const s = setSave(set.id), all = allCards();
 const have = all.filter(c => s.owned[c.id] > 0).length;
 const rars = [...new Set(all.map(c => c.rar))].sort((a,b) => cfg.order.indexOf(a) - cfg.order.indexOf(b));
-if (el('Rar').dataset.set !== set.id){
+const mappedRareFilter=P==='tl'&&set.liveRarityPolicy?.merged&&el('Rar').value==='TH';
+if (el('Rar').dataset.set !== set.id+'|'+(set.rarityVersion||'')){
 el('Rar').innerHTML = `<option value="all">Alle Seltenheiten</option>` + rars.map(r => `<option value="${r}">${RARITIES[r].sym} ${RARITIES[r].name}</option>`).join('');
-el('Rar').dataset.set = set.id;
+el('Rar').dataset.set = set.id+'|'+(set.rarityVersion||'');
 }
+if(mappedRareFilter)el('Rar').value='T3';
 el('Prog').innerHTML = progHTML(have, all.length, esc(set.name));
 el('Info').textContent = `${s.packs} Packs geöffnet · ${have}/${all.length} Karten gesammelt`;
 el('Stats').innerHTML = `<span><b>${esc(set.name)}</b> · ${have}/${all.length} gesammelt · ${s.packs} Packs geöffnet</span>` +
@@ -5253,6 +6567,7 @@ extMissingHTML(c)}</div>`; }).join('')
 }
 function open(n){
 if (!set || loading) return dkToast('Set wird noch geladen …');
+if(set.profileUnavailable)return dkToast('Dieses Live-Set benötigt ein freigegebenes Ziehprofil.');
 if (!pool().length) return dkToast('Für diese Auswahl gibt es keine Karten.');
 SRC = src; openPacks(n);
 }
@@ -5361,7 +6676,7 @@ else { el.style.display = 'none'; el.parentNode.classList.add('noimg'); }
 };
 function extCardHTML(c, extraClass=''){
 const RR = RARITIES[c.rar], first = (c.imgs || [])[0];
-return `<div class="card ext r-${c.rar} ${isSpecial(c) ? 'xholo' : ''} ${extraClass} ${first ? '' : 'noimg'}" data-id="${esc(c.id)}">
+return `<div class="card ext r-${c.rar} ${isSpecial(c)||(c.rar==='T3'&&(c.physicalHolo||c.variants?.holo&&!c.variants?.normal)) ? 'xholo' : ''} ${extraClass} ${first ? '' : 'noimg'}" data-id="${esc(c.id)}">
     ${first ? `<img src="${first}" data-cid="${esc(c.id)}" data-i="0" alt="${esc(c.name)}" loading="lazy" draggable="false" onerror="window.__mcpImgErr?.(this)">` : ''}
     <span class="xf">${esc(c.name)}<br><small>${RR.sym} ${RR.name}</small></span>
   </div>`;
@@ -5569,7 +6884,9 @@ const LIVE_MODERN_X2 = ['sv01','sv02','sv03','sv04','sv05','sv06','sv06.5','sv07
 const LIVE_SLOT_KEEP = [0,1,2,4,5,7,8,9];
 const LIVE_PROTECTION = 0.5;
 function liveProfileFor(st){
-const p = liveProfileForBase(st);
+ const approved=liveApprovedProfile(st);if(approved)return approved;
+ if(st.profileUnavailable)return {name:'Live-Profil noch nicht freigegeben',src:'Set-/Raritätssystem und Pull-Rates benötigen Prüfung.',slots:[],perPack:[]};
+ const p = liveProfileForBase(st);
 if (p.slots.length === 10){ p.slots = LIVE_SLOT_KEEP.map(i => p.slots[i]); p.galleryIndex = 5; p.collectorPack = true; }
 return p;
 }
@@ -5597,7 +6914,8 @@ if (!opts.length){ const base = cards.filter(c => !gal.has(c)); return [[base.le
 return opts;
 }
 function liveDraw(st, pl, owned, batchSeen){
-const prof = st.prof, protect = st.id !== 'cel25';
+ if(st.profileUnavailable||!pl.length)throw Error('Live-Profil oder Kartenpool noch nicht freigegeben');
+ const prof = st.prof, protect = st.id !== 'cel25';
 const seen = new Set(batchSeen || []), has = c => (owned[c.id] > 0) || seen.has(c.id);
 const god = prof.god && Math.random() < prof.god.p;
 return (god ? prof.slots.map(() => prof.god.slot) : prof.slots).map(tb => {
@@ -5610,14 +6928,17 @@ seen.add(card.id); return card;
 });
 }
 function liveRarityChances(st){
-const cards = st.cards, maps = st.prof.slots.map(tb => { const m = {}, opts = liveSlotOptions(cards, tb), tot = opts.reduce((s,o) => s + o[1], 0);
+const cards = st.cards.filter(c=>!c.drawBlocked), maps = st.prof.slots.map(tb => { const m = {}, opts = liveSlotOptions(cards, tb), tot = opts.reduce((s,o) => s + o[1], 0);
 opts.forEach(([l,w]) => l.forEach(c => { m[c.r] = (m[c.r] || 0) + w/tot/l.length; })); return m; });
 const out = {}; [...new Set(cards.map(c => c.r))].forEach(r => { out[r] = 1 - maps.reduce((p,m) => p*(1-(m[r]||0)), 1); });
 return out;
 }
 function liveOddsExtra(st){
-const p = st.prof, parts = [], f = v => (v*100).toLocaleString('de-DE',{maximumFractionDigits:2});
-if (p.collectorPack) parts.push('<b>Angepasster Webapp-Sammelbooster:</b> 8 Karten (3 gewöhnliche, 2 ungewöhnliche, Misch-/Galerieslot, Spezialslot, Abschluss-Slot). Kein offizieller Boosteraufbau, keine offiziellen Pull-Rates.');
+ const p = st.prof, parts = [], f = v => (v*100).toLocaleString('de-DE',{maximumFractionDigits:2});
+ if(st.profileUnavailable)parts.push('<b>Profil gesperrt:</b> keine automatische Freigabe eines Fallbackprofils.');
+ if(st.liveRarityPolicy?.merged)parts.push('<b>Gemeinsamer Selten-Pool:</b> alle Basis-Selten-Karten gleichberechtigt; freigegebene B-Gewichte, Weiße Flammen mit gesondertem Selten-Anteil. Grundchancen vor Duplikatschutz; keine Premium-Verteilung.');
+ const unresolved=st.cards.filter(c=>c.drawBlocked).length;if(unresolved)parts.push('<b>Offen:</b> '+unresolved+' Karteneinträge derzeit nicht zieh-/tauschbar; Quelldaten oder Profil klären.');
+ if (p.collectorPack) parts.push('<b>Angepasster Webapp-Sammelbooster:</b> 8 Karten (3 gewöhnliche, 2 ungewöhnliche, Misch-/Galerieslot, Spezialslot, Abschluss-Slot). Kein offizieller Boosteraufbau, keine offiziellen Pull-Rates.');
 if (p.x2Changes && p.x2Changes.length) parts.push('<b>Gezielte Hit-Erhöhung (x2):</b> ' + p.x2Changes.map(c => `${RARITIES[c.pool] ? RARITIES[c.pool].name : c.pool} ${c.from.toLocaleString('de-DE')} % → ${c.to.toLocaleString('de-DE')} %`).join(' · ') + ' (Ausgleich aus dem Füllanteil desselben Slots).');
 if (st.id !== 'cel25') parts.push('<b>Duplikatschutz 50 %:</b> Ist eine gezogene Karte bereits im Besitz oder im selben Opening schon gezogen, wird sie mit 50 % Wahrscheinlichkeit durch eine noch fehlende Karte desselben Slot-Pools ersetzt. Ist der Pool vollständig, bleiben Duplikate möglich.');
 const ch = liveRarityChances(st), order = LIVE.cfg.order;
@@ -6198,7 +7519,7 @@ status.classList.toggle('mcp60info-available',!received);
 function mcp60Spend(n){mcp60Daily();const cost=n*1000;if(!Number.isSafeInteger(cost)||mcp60Wallet.units<cost){dkToast('Nicht genug Pack-Token. Benötigt: '+n+' · Guthaben: '+mcp60Format(mcp60Wallet.units));return false;}mcp60Wallet.units-=cost;mcp60Write();return true;}
 function mcp60Refund(n){mcp60Wallet=mcp60Read();mcp60Wallet.units+=n*1000;mcp60Write();}
 function mcp60Foil(c){return !!c.lc&&(c.foil===true||String(c.id).endsWith('-f'));}
-function mcp60Value(c){let v=MCP60_VALUES[c.rar]||0;return v;}
+function mcp60Value(c){if(c.rar==='TBW'&&LIVE_MERGED_RARE.tbwIds.includes(String(c.id)))return 2000;let v=MCP60_VALUES[c.rar]||0;return v;}
 function mcp60Group(c){if(c.op)return c.variant==='parallel'?(c.rarity==='L'?'OPAA-L':'OPAA'):c.variant==='manga'?'OPM':c.variant==='box'?'OPBT':c.variant==='special'?'OPX':c.rar;return c.rar;}
 function mcp60Context(){
 if(mode==='pocket'||mode==='live')return (mode==='pocket'?POCKET:LIVE).rewardContext();
@@ -6313,8 +7634,8 @@ function openingFilterVariants(){return [...$('#opVar').options].filter(o=>o.val
 function openingFilterCategory(c){return c.op?c.rarity:c.rar;}
 function openingFilterLegacyMatches(c,raw){const category=c.lc?c.rar+(mcp60Foil(c)?':foil':':normal'):c.op?mcp60Group(c):c.rar;return raw.kind==='custom'?Array.isArray(raw.categories)&&(c.lc?raw.categories.some(k=>String(k).split(':')[0]===c.rar):raw.categories.includes(category)):(Number.isFinite(RANK[c.rar])&&RANK[c.rar]>=raw.minRank);}
 function openingFilterRead(ctx){
- const cats=openingFilterCategories(ctx),order=cats.map(c=>c.id),raw=openingFilterSettings[ctx.key];
- const fallback=ctx.key==='mcp'?'A':ctx.key.startsWith('lc:')?'LC5':ctx.key.startsWith('op:')?'SEC':ctx.key.startsWith(POCKET.cfg.key+':')?'S1':'TH';
+ const cats=openingFilterCategories(ctx),order=cats.map(c=>c.id),merged=liveMergedContextKey(ctx.key),raw=merged?liveNormalizeRarityFilter(openingFilterSettings[ctx.key]):openingFilterSettings[ctx.key];
+ const fallback=ctx.key==='mcp'?'A':ctx.key.startsWith('lc:')?'LC5':ctx.key.startsWith('op:')?'SEC':ctx.key.startsWith(POCKET.cfg.key+':')?'S1':merged?'T3':'TH';
  const start=order.indexOf(fallback),defaultId=start>=0?fallback:(cats.find(k=>ctx.cards.some(c=>openingFilterCategory(c)===k.id&&RANK[c.rar]>=(ctx.key.startsWith(LIVE.cfg.key+':')?3:4)))?.id||order[0]);
  if(raw?.schema===2)return {schema:2,kind:raw.kind==='custom'?'custom':'threshold',threshold:order.includes(raw.threshold)?raw.threshold:defaultId,categories:Array.isArray(raw.categories)?raw.categories.filter(x=>order.includes(x)):[],variants:Array.isArray(raw.variants)?raw.variants.filter(x=>openingFilterVariants().some(v=>v.id===x)):[],foil:!ctx.key.startsWith('lc:')&&raw.foil===true,newOnly:raw.newOnly===true,order};
  const rule={schema:2,kind:'threshold',threshold:defaultId,categories:[],variants:ctx.key.startsWith('op:')?['parallel','manga','box','special']:[],foil:false,order};
@@ -6775,9 +8096,12 @@ function detailContent(g){
   else{const prb=mcpActive.op==='prb01';layout=(prb?'10':'8')+' Karten: 3 Common, 2 Uncommon, 1 Common-/Leader-Platz (Leader '+detailPct(m.leader*100)+'), 1 Rare und 1 Trefferplatz.'+(prb?' PRB-01 ergänzt zwei weitere Common-/Uncommon-Karten.':'')+' DON!!-Karten sind nicht Teil dieses Sammelmodells.';rates=detailTable(m.hit,{R:'Rare',SR:'Super Rare',SEC:'Secret Rare · Standard',AA:'Alternate Art ohne Leader',LAA:'Leader Alternate Art',SP:'SP / Sonderdruck',M:'Manga / Super Alternate Art',BT:'Box-Topper'});collection='Druckversionen bleiben getrennte Sammeleinträge. Normale Packs enthalten keine doppelte Karten-ID; Spezialpacks verwenden ihr eigenes Rezept. Box-Topper und Sonderdrucke sind, sofern im Pool vorhanden, Teil des angepassten Sammelmodells. OP13 Super Alternate Art einschließlich Red verwendet den gemeinsamen Manga-Modellpool.';}
  }else{
   const api=g==='pocket'?POCKET:LIVE,st=api.set;if(!st)return '<p>Setdaten werden geladen …</p>';title=st.name;const pl=api.openingPool();
+  if(g==='live'&&st.profileUnavailable)return '<p><b>'+esc(title)+'</b></p><p role="status">Das Ziehprofil dieses Sets ist noch nicht freigegeben. Karten können angesehen werden; Packkäufe und Tausch bleiben bis zur Klärung gesperrt.</p>'+detailSources(g);
   layout=(st.prof.slots.length)+' Karten im regulären Modell. Die ausgewählte Booster-Variante bestimmt den zulässigen Kartenpool ('+pl.length+' Karteneinträge).';
   protection=g==='live'&&st.id==='cel25'?'Für dieses Jubiläumsprofil ist kein Duplikatschutz aktiv.':'50 % Duplikatschutz innerhalb des ausgewählten Kartenpools. Bereits vorhandene oder im Opening gezogene Karten werden nach Möglichkeit durch eine fehlende Karte desselben Pools ersetzt. Neue Karten sind nicht garantiert.';
   collection='Die Sammeleinträge entsprechen dem Album. Der Opening-Filter verändert nur die Anzeige; sämtliche gezogenen Karten werden gesammelt.';
+  if(g==='live'&&st.liveRarityPolicy?.merged)collection+=' Selten und Holo-Selten bilden eine gemeinsame fachliche Seltenheit und einen gleichberechtigten Ziehpool. Physische Holo-/Variantenmerkmale bleiben erhalten. Die abgestimmten Grundchancen gelten vor dem besitzabhängigen Duplikatschutz, nicht als Premium-Verteilung.';
+  if(g==='live'&&st.cards.some(c=>c.drawBlocked))collection+=' Ungeklärte Quellseltenheiten bleiben sichtbar im Album, sind bis zur Klärung jedoch nicht zieh- oder tauschbar.';
   if(g==='pocket'){
    const labels={C:'Diamant 1',U:'Diamant 2',R:'Diamant 3',CF:'Diamant 1 Foil',UF:'Diamant 2 Foil',RF:'Diamant 3 Foil',RR:'Diamant 4 ex',AR:'Stern 1',SR:'Stern 2',IM:'Immersiv',S:'Shiny 1',SSR:'Shiny 2',UR:'Krone',Rbaby:'Baby Diamant 3',ARbaby:'Baby Stern 1',IMbonus:'Immersiver Bonus'};
    rates=st.prof.pocket.models.map(model=>'<details><summary>'+esc(model.name)+' · '+detailPct(model.chance*100)+' · '+model.slots.length+' Karten</summary>'+detailSlots(model.slots.map(row=>Object.fromEntries(Object.entries(row).filter(([k,w])=>w>0&&pl.some(c=>pocketPoolCode(st,c)===k)))),labels)+'</details>').join('');layout+=' Sonder- und Bonuspacks können eine andere Kartenanzahl haben. Ihre Modellchancen stehen unten.';if(st.id==='B4b')layout+=' B4b verwendet ein vorläufiges Rekonstruktionsmodell.';
@@ -6936,7 +8260,7 @@ let anWorking=false,anScheduled=false;
 const anBlank=()=>({query:'',rarities:[],status:'all',open:false});
 function anFilterPass(g,c,n){
  if(!document.body.classList.contains('an-ready'))return true;
- const f=anFilters[g];if(!f)return true;const q=f.query.trim().toLowerCase();
+ const f=anFilters[g];if(!f)return true;if(g==='tl'&&LIVE.set?.liveRarityPolicy?.merged)f.rarities=[...new Set(f.rarities.map(r=>r==='TH'?'T3':r))];const q=f.query.trim().toLowerCase();
  return (!q||(c.name+' '+(c.localId??c.collectorLabel??c.number??'')+' '+pad3(c.number??c.localId??'')+' '+c.id).toLowerCase().includes(q))&&(!f.rarities.length||f.rarities.includes(c.rar))&&(f.status==='all'||f.status==='miss'&&!n||f.status==='dup'&&n>1||f.status==='own'&&n>0);
 }
 function anGroup(){return promoDialog.open?'promo':mode==='pocket'?'or':mode==='live'?'tl':mode}
@@ -7408,7 +8732,7 @@ body[data-design-tone=light] #versionHistoryDone{background:#355b73;color:#fff;b
 body[data-design-tone=light] :is(.start-history-button:focus-visible,#versionHistoryDialog button:focus-visible){outline-color:#176496}
 #versionHistoryClose{min-width:44px;min-height:44px}
 </style>
-<dialog id="versionHistoryDialog" aria-labelledby="versionHistoryTitle" data-version="v1.6.1"><header><div><h2 id="versionHistoryTitle">Was ist neu?</h2><p>Die letzten Änderungen an deinen Kartenwelten.</p></div><button type="button" id="versionHistoryClose" aria-label="Neuerungen schließen">×</button></header><div class="history-content"><section class="history-version"><h3>v1.6.1 <small>23. Oktober 2026</small></h3><ul><li><strong>Die Stadt Hyperia</strong><p>Lorcana wächst um das neue Set „Die Stadt Hyperia“ mit 242 deutschen Kartenmotiven. Das Set ist im Album, in der Setauswahl und beim Öffnen von Boostern und Premiumdisplays verfügbar.</p></li><li><strong>Tokeninformationen und Navigation</strong><p>Dein exaktes Guthaben, Packkosten und Hinweise zum Spielstand haben eine eigene Infoseite mit Rückweg. Aus Profil, Tauschwerkstatt und Tokeninformationen erreichst du auch die Promo-Alben und die übrigen Hauptbereiche direkt.</p></li><li><strong>Praktischeres Profil und Tauschwerkstatt</strong><p>Theme und Ton sind im Profil direkt erreichbar. Die aktive Token-Kartensteuerung sitzt unter dem Kartenraster und verschwindet bei Abwahl. Pocket und TCG Live merken sich ihr zuletzt gewähltes Promo-Album getrennt.</p></li></ul></section><section class="history-version"><h3>v1.6.0 <small>19. Oktober 2026</small></h3><ul><li><strong>Mehr Übersicht im Profil</strong><p>Ein kompakter Header lässt mehr Platz für deine Sammlung. Im Profil findest du Spielstand, Darstellung, Ton und Neuerungen in übersichtlichen aufklappbaren Bereichen.</p></li><li><strong>Kompakte Tauschwerkstatt</strong><p>Kleinere Karten, zwei klare Reiter und eine gemeinsame −/+/Max-Leiste erleichtern die Auswahl. Mit den Auswahl-Icons kannst du Doppelte vormerken oder die Vormerkung leeren. Auf einer eigenen Prüfseite siehst du alle Mengen, bevor du den Tausch bestätigst.</p></li><li><strong>Siegel für vollständige Alben</strong><p>Aktuell vollständige Alben und Promo-Alben erhalten ein Sammler-Siegel. Beim vollständigen Sammeln erscheint nach der Kartenansicht ein Glückwunsch. Wird das Album wieder unvollständig, entfällt das Siegel; ein erneuter Abschluss ist möglich.</p></li></ul></section><section class="history-version"><h3>v1.5.0 <small>18. Oktober 2026</small></h3><ul><li><strong>Profil und freiwilliges Konto</strong><p>Profil und Tauschwerkstatt haben eigene App-Seiten mit Rückweg. Oben findest du Guthaben, Tauschen und Profil nebeneinander; die Tokeninformationen zeigen weiterhin den exakten Betrag. Gast- und Kontospiel bleiben getrennt, eine Übernahme verlangt Vorschau und Sicherung.</p></li><li><strong>Willkommen und Kontoverwaltung</strong><p>Nach bestätigter E-Mail und gestartetem Kontospielstand kannst du einmalig 100 Token im Profil abholen. Ein Löschantrag zeigt die Folgen und den Bearbeitungsstatus; die manuelle Bearbeitung erfolgt innerhalb von sieben Tagen.</p></li><li><strong>Tauschwerkstatt mit Kartenbildern</strong><p>Token erhalten oder eine fehlende Wunschkarte wählen: mit Suche, Seltenheitsfiltern und gut erreichbaren Mengentasten. Mobil stehen drei Karten nebeneinander. Tauschwerte, vier passende Doppelte und die geschützte letzte Kopie bleiben erhalten. Die Versionsübersicht passt sich jetzt auch dem Hellmodus an.</p></li></ul></section><section class="history-version"><h3>v1.4.7 <small>17. Oktober 2026</small></h3><ul><li><strong>Mega-Attacke-Karten tauschen</strong><p>Doppelte Mega-Attacke-Rare-Karten im TCG-Live-Bereich lassen sich jetzt für jeweils 0,8 Token eintauschen. Auch der Wunschtausch ist mit vier passenden Doppelten derselben Seltenheit möglich. Eine Kopie bleibt geschützt.</p></li></ul></section><section class="history-version"><h3>v1.4.6 <small>16. Oktober 2026</small></h3><ul><li><strong>Navigation korrekt markiert</strong><p>Promos wird nur noch als aktiv hervorgehoben, während das Promo-Album geöffnet ist.</p></li><li><strong>Sammlungsverwaltung aufgeräumt</strong><p>Die Schaltflächen zum Zurücksetzen einer Sammlung oder aller Sets sind vorerst in allen Kartenwelten ausgeblendet. Albumfilter lassen sich weiterhin zurücksetzen.</p></li></ul></section><section class="history-version"><h3>v1.4.5 <small>15. Oktober 2026</small></h3><ul><li><strong>Kartenansicht im Querformat verbessert</strong><p>Die Kartengröße berücksichtigt Varianten und Bestandsinformationen. So bleibt Schließen auch im kleinen Querformat vollständig sichtbar.</p></li></ul></section><section class="history-version"><h3>v1.4.4 <small>15. Oktober 2026</small></h3><ul><li><strong>Deine Sammlung, klarer im Blick</strong><p>Einheitliche Navigation und Albumfilter in allen Kartenwelten: Suche, mehrere Seltenheiten und Sammlungsstatus auf einer einklappbaren Fläche. Promos findest du direkt neben dem Album.</p></li><li><strong>Promos gezielt ergänzen</strong><p>Neue Promo-Angebote enthalten nur noch fehlende Karten. Bereits gespeicherte Auswahlen bleiben einmal unverändert einlösbar; verdiente Ansprüche bleiben erhalten. Promo-Karten lassen sich wie im Pokémon-Album durchblättern.</p></li></ul></section><section class="history-version"><h3>v1.4.3 <small>15. Oktober 2026</small></h3><ul><li><strong>Android-Installation vorbereitet</strong><p>Name, App-Symbol und Start im eigenen App-Fenster sind für die Installation über den Android-Browser vorbereitet. Die bisherige App-Adresse und deine Spielstände bleiben erhalten.</p></li></ul></section><section class="history-version"><h3>v1.4.2 <small>14. Oktober 2026</small></h3><ul><li><strong>Versionsanzeige korrigiert</strong><p>Die App und die Übersicht der Neuerungen zeigen den aktuellen Stand der 1.4-Reihe. Deine Sammlungen und Token bleiben erhalten.</p></li></ul></section><section class="history-version"><h3>v1.4.1 <small>14. Oktober 2026</small></h3><ul><li><strong>Kompaktere mobile Set-Auswahl</strong><p>Kleinere Set-Kacheln zeigen mehr Erweiterungen auf einen Blick. Setnamen, Sammlung und Prozentwerte bleiben sichtbar.</p></li><li><strong>Farbiger Sammlungsfortschritt</strong><p>Blaue Balken begleiten deine Sammlung; vollständig gesammelte Sets werden grün markiert. In Hell- und Dunkelmodus.</p></li></ul></section><section class="history-version"><h3>v1.4.0 <small>13. Oktober 2026</small></h3><ul><li><strong>Promo-Alben und Sammelaufträge</strong><p>Eigene Promo-Sets für Pocket und TCG Live. Je 20 neue Packs wählst du eine von drei Karten; Auswahl und Fortschritt bleiben gespeichert.</p></li><li><strong>Neue Kartenwelten – hell und dunkel</strong><p>Eigene Farben je TCG, mobile Kartenwelt- und Set-Auswahl, klarere Alben und besser lesbare Texte. Pocket und TCG Live erhalten eigene ruhige Kartenrücken.</p></li><li><strong>Stärkere Premium-Displays und Opening-Filter</strong><p>Angepasste Premium-Garantien für Lorcana und One Piece, individuelle Hit-Filter und „Nur neue Karten“. Details findest du unter „Alle Neuerungen ansehen“.</p></li><li><strong>Deine bisherigen Spielstände bleiben erhalten</strong><p>Sammlungs-IDs, Kartenmengen und Token-Guthaben bleiben bestehen. Lorcana zählt frühere Normal- und Foil-Kopien gemeinsam und verwendet den geprüften deutschen Katalog. Zusätzliche Speicherung betrifft nur die neuen Promo-Aufträge.</p></li></ul></section><section class="history-version"><h3>v1.3.2 <small>13. Oktober 2026</small></h3><ul><li><strong>Besser lesbare Texte in beiden Modi</strong><p>Promo-Einstieg und Suchhinweise sind im Dunkelmodus heller. Nebeninfos und Navigation sind im Hellmodus kräftiger; Öffnungsbuttons haben klareren Kontrast. Einheitliche Textfarben für neue Oberflächen.</p></li><li><strong>Eigene Kartenrücken für Pocket und TCG Live</strong><p>Die Startseiten-Symbole begleiten jetzt deine Openings: Pocket mit Mint/Creme, TCG Live mit Prismablau. Ruhige Kartenrücken ohne Glanz oder Animation, passend zu Hell- und Dunkelmodus.</p></li><li><strong>Ruhiger App-Start und bereinigte Alben</strong><p>Kein kurzes Lorcana-Aufblitzen vor der Startseite. Die mobile Setwahl in Pocket und TCG Live nutzt die verfügbare Feldbreite. Lorcana und One Piece zeigen auch nach Filtern und Setwechseln keine Namen- oder Mengenzeilen unter den Karten.</p></li><li><strong>Eigene Promo-Sammlungen und wiederholbare Aufträge</strong><p>1.568 Promokarten mit geprüftem Bildmaterial: 220 für Pocket und 1.348 im TCG-Live-Bereich. Eigenständige Promo-Sets, ohne Zuordnung zu regulären Erweiterungen. Je 20 seit Einführung geöffnete Packs entsteht eine Auswahl: gewünschtes Promo-Set auswählen, drei verschiedene Karten ansehen und eine erhalten. Mindestens eine angebotene Karte fehlt noch, sofern im Set verfügbar. Einzelpacks, 10er-Openings und Premium-Displays zählen nach Packzahl, ohne rückwirkende Anrechnung. Erfüllte Aufträge und begonnene Auswahlen bleiben gespeichert. Eigene Promo-Mengen; kein Token-Tausch. Englische Bilder/Namen sind gekennzeichnet. 37 ungeklärte Bilder intern erhalten, aus Album und Belohnungspool ausgeschlossen.</p></li><li><strong>Kartenwelt-Design und mobile Navigation</strong><p>Einheitliche helle Oberflächen mit Rosa/Violett für Monster Cards, Mint/Creme für Pocket, Eisblau/Türkis für TCG Live, Türkis/Lavendel für Lorcana und Meerblau/Sandgold für One Piece. Ein Mond-/Sonnenbutton schaltet den appweiten Hell-/Dunkelmodus um; die Wahl bleibt beim TCG-Wechsel und nach Neuladen erhalten. Auf dem Handy ersetzt eine Auswahl mit allen fünf TCGs die schiebbare obere Leiste. Booster und Sammlungsdaten bleiben unverändert. Die Kopfzeile zeigt keine doppelten Monster-Cards-Sammlungs-/Pack-Zähler mehr; im Album stehen Fortschritt und geöffnete Packs über den Filtern. Lorcana zeigt wie Pokémon eine Set-/Pack-Übersicht sowie gesammelte Karteneinträge je Seltenheit statt technischer Kataloghinweise. Mobil zeigt Lorcana wie die übrigen TCG-Alben drei Karten je Zeile.</p></li><li><strong>Mobil entspannt zwischen Sets wechseln</strong><p>Die Set-Auswahl öffnet auf schmalen Bildschirmen und Touch-Geräten ohne automatischen Fokus im Suchfeld. Damit verdeckt die Bildschirmtastatur nicht sofort die Set-Kacheln. Erst Antippen aktiviert die Suche. Am Desktop wird das Suchfeld weiterhin direkt fokussiert. Gilt für Packs und Album in Pocket, TCG Live, Lorcana und One Piece.</p></li><li><strong>Pack-Infos, Alben und Geschenk-Hinweis aufgeräumt</strong><p>Packaufbau, Modellchancen, Duplikatschutz, Premium-Garantien, Spezialpacks und Quellen werden einheitlich aus den aktuellen App-Profilen dargestellt. Veraltete Aussagen zu Display-Garantien und Katalogständen sind entfernt. Lorcana und One Piece zeigen bei fehlenden Karten Nummer, Name und Seltenheit direkt auf der Karte; die separaten Namen- und Mengenzeilen unter Albumkarten entfallen. Das 100-Token-Geschenk wird nach dem Abholen ausgeblendet, auch nach Neuladen. Die Startseite verwendet für alle TCGs einheitlich „Karteneinträge gesammelt“; die Zählweise bleibt unverändert.</p></li><li><strong>Premium-Garantien für Lorcana und One Piece angepasst</strong><p>Lorcana: 24 Packs für 40 Token mit mindestens 6 Epischen, 4 Legendären und 1 Verzauberten. Sets mit Mythisch garantieren zusätzlich 1 Mythische. Ikonisch bleibt eine zufällige Überraschung. One Piece: 24 Packs für 30 Token mit mindestens 6 Standard-SR, 1 Standard-SEC und 2 Alternate-Art-/Parallelkarten; PRB-01 enthält 20 Packs für 25 Token mit denselben Mindesttreffern. Keine Doppelanrechnung zwischen Standard- und Parallel-Garantien. Natürlich gezogene zusätzliche Treffer bleiben erhalten. Eigene Webapp-Garantien, keine offiziellen Display-Pull-Rates.</p></li><li><strong>Visuelle Set-Auswahl in vier Kartenwelten</strong><p>Pocket, Pokémon TCG Live, Lorcana und One Piece zeigen Sets als Kacheln mit Sammlungsfortschritt. Suche nach Namen oder Kürzel, grenze nach Serie ein und kehre über zuletzt verwendete Sets schnell zurück. Die Auswahl funktioniert bei Packs und im Album. Pocket-Booster wählst du anschließend unter der Erweiterung. Lorcana und One Piece verwenden einheitliche Set-Kürzel, auch unter „Zuletzt verwendet“; dort gibt es keine Karten- oder Coverbilder. Noch nicht geladene Kataloge sind gekennzeichnet; bestehende Kopien und Token bleiben erhalten.</p></li><li><strong>Lorcana: eine Sammlung je Kartenmotiv</strong><p>Normal- und Foil-Kopien werden gemeinsam gezählt. Deine bisherigen Kopien bleiben vollständig erhalten; besondere Illustrationen bleiben eigene Karten.</p></li><li><strong>Neuer Foil-Look für besondere Lorcana-Karten</strong><p>Episch, Legendär, Mythisch, Verzaubert und Ikonisch erhalten einen durchgängigen Foil-Effekt über der gesamten Karte. Die höchsten Seltenheiten behalten ihre Originalfarben; Regenbogen und Gold liegen in beweglichen Glanzreflexen. In der Großansicht und beim Aufdecken wandert der Glanz ruhig weiter. Auch auf dem Handy bedienbar, ohne separate Foil-Sammelvariante. Ergänzt am 13. Oktober: Legendär mit warmem Satin-Goldglanz zwischen Episch und Mythisch; die anderen Stufen bleiben unverändert.</p></li><li><strong>Deutscher Lorcana-Katalog korrigiert</strong><p>Verwechselte Promo-Bilder wurden durch die passenden deutschen Setkarten ersetzt. Auch die vier Zusatzdrucke aus Die große Honigrettung sind jetzt mit deutschen Originalbildern zugeordnet und im Webapp-Modell wieder ziehbar. Vorhandene Kopien bleiben erhalten.</p></li><li><strong>Lorcana-Filter und Tausch vereinheitlicht</strong><p>Fortschritt, neue Karten und Doppelte beziehen sich auf das Kartenmotiv. Hit-Regeln und Tauschwerte richten sich nach der Seltenheit; die separate Foil-Auswahl entfällt.</p></li><li><strong>Pack-Token-Icon verbessert</strong><p>Ein helles Booster-Symbol ersetzt den dunklen Balken in der Token-Münze – im Guthaben und im Infofenster.</p></li></ul></section><section class="history-version"><h3>v1.3.1 <small>Vorherige Neuerungen</small></h3><ul><li><strong>Deine Kartenwelten auf der Startseite</strong><p>Wechsle schnell zwischen den fünf Kartenwelten und sieh deine Sammlungszahlen und Fortschrittsbalken. Die Startseite zeigt außerdem die letzten Neuerungen.</p></li><li><strong>Opening-Filter für jedes Set</strong><p>Lege fest, welche Seltenheiten als Hits zählen – mit derselben Auswahl und Reihenfolge wie im Album. Beim 10er-Opening werden nur die passenden Treffer einzeln gezeigt; alle gezogenen Karten werden gesammelt.</p></li><li><strong>Nur neue Karten anzeigen</strong><p>Die Checkbox im Opening-Filter zeigt ausschließlich erstmals gesammelte Karten, unabhängig von ihrer Seltenheit. Mehrfach gezogene Kopien derselben neuen Karte gelten nur beim ersten Mal als neu. Verfügbar in allen Kartenwelten.</p></li><li><strong>Übersichtlichere Öffnungen</strong><p>Der sichtbare Stapel enthält maximal acht Karten, damit Hinweise lesbar bleiben. Nach einem einzelnen Pack, einem 10er-Opening oder einem Premium-Display kannst du direkt zur Boosterauswahl zurückkehren.</p></li><li><strong>Premium-Displays mit garantierten Hits</strong><p>Für Pokémon TCG Live, Lorcana und One Piece gibt es Premium-Displays gegen zusätzliche Pack-Token. Vor dem Kauf siehst du den Preis und die garantierten Mindesttreffer des gewählten Sets.</p></li><li><strong>Seltene God-Pack-Überraschungen</strong><p>In unterstützten Sets können zufällig besondere Packs auftauchen: Pokémon 151, Prismatische Entwicklungen und One Piece PRB-01. Der Inhalt hängt vom Set ab. God Packs sind nicht separat kaufbar; bei Lorcana gibt es keine God Packs.</p></li><li><strong>Doppelte bequem am Handy tauschen</strong><p>Wähle Mengen mit Plus, Minus oder Max statt Tippen in einzelnen Feldern. Tausche Doppelte gegen Token oder genau vier passende Doppelte gegen eine fehlende Wunschkarte. Mindestens eine Kopie bleibt erhalten.</p></li><li><strong>Ein Dankeschön: 100 Token</strong><p>Auf der Startseite kannst du bis zum 18. Oktober 2026 einmalig 100 zusätzliche Pack-Token abholen.</p></li></ul></section></div><footer><button type="button" id="versionHistoryDone">Alles klar</button></footer></dialog>
+<dialog id="versionHistoryDialog" aria-labelledby="versionHistoryTitle" data-version="v1.6.2"><header><div><h2 id="versionHistoryTitle">Was ist neu?</h2><p>Die letzten Änderungen an deinen Kartenwelten.</p></div><button type="button" id="versionHistoryClose" aria-label="Neuerungen schließen">×</button></header><div class="history-content"><section class="history-version"><h3>v1.6.2 <small>24. Oktober 2026</small></h3><ul><li><strong>Gemeinsame Selten-Gruppe in TCG Live</strong><p>In 15 aktuellen Live-Sets gehören seltene und holo-seltene Karten gemeinsam zu „Selten“. Albumfilter, Sammelbooster und Wunschtausch verwenden dieselbe Gruppe. Jede abgegebene Dublette bringt 0,08 Token; ihre Kartenkennung und Holo-Merkmale bleiben erhalten.</p></li><li><strong>Angepasste Sammelbooster</strong><p>Die Chancen der betroffenen Live-Sammelbooster sind auf die gemeinsame Selten-Gruppe abgestimmt. Weiße Flammen erhält einen zusätzlichen Selten-Anteil. Höhere Seltenheiten, Premiumgarantien und die geschützte letzte Kopie bleiben erhalten.</p></li><li><strong>Black White Rare gezielt tauschen</strong><p>Die vier Black-White-Rare-Karten aus Schwarze Blitze und Weiße Flammen bringen je abgegebener Dublette 2 Token. Ihr Wunschtausch bleibt in einer eigenen Gruppe. Bereits gebuchte Token und vorhandene Sammlungen werden nicht nachträglich verändert.</p></li></ul></section><section class="history-version"><h3>v1.6.1 <small>23. Oktober 2026</small></h3><ul><li><strong>Die Stadt Hyperia</strong><p>Lorcana wächst um das neue Set „Die Stadt Hyperia“ mit 242 deutschen Kartenmotiven. Das Set ist im Album, in der Setauswahl und beim Öffnen von Boostern und Premiumdisplays verfügbar.</p></li><li><strong>Tokeninformationen und Navigation</strong><p>Dein exaktes Guthaben, Packkosten und Hinweise zum Spielstand haben eine eigene Infoseite mit Rückweg. Aus Profil, Tauschwerkstatt und Tokeninformationen erreichst du auch die Promo-Alben und die übrigen Hauptbereiche direkt.</p></li><li><strong>Praktischeres Profil und Tauschwerkstatt</strong><p>Theme und Ton sind im Profil direkt erreichbar. Die aktive Token-Kartensteuerung sitzt unter dem Kartenraster und verschwindet bei Abwahl. Pocket und TCG Live merken sich ihr zuletzt gewähltes Promo-Album getrennt.</p></li></ul></section><section class="history-version"><h3>v1.6.0 <small>19. Oktober 2026</small></h3><ul><li><strong>Mehr Übersicht im Profil</strong><p>Ein kompakter Header lässt mehr Platz für deine Sammlung. Im Profil findest du Spielstand, Darstellung, Ton und Neuerungen in übersichtlichen aufklappbaren Bereichen.</p></li><li><strong>Kompakte Tauschwerkstatt</strong><p>Kleinere Karten, zwei klare Reiter und eine gemeinsame −/+/Max-Leiste erleichtern die Auswahl. Mit den Auswahl-Icons kannst du Doppelte vormerken oder die Vormerkung leeren. Auf einer eigenen Prüfseite siehst du alle Mengen, bevor du den Tausch bestätigst.</p></li><li><strong>Siegel für vollständige Alben</strong><p>Aktuell vollständige Alben und Promo-Alben erhalten ein Sammler-Siegel. Beim vollständigen Sammeln erscheint nach der Kartenansicht ein Glückwunsch. Wird das Album wieder unvollständig, entfällt das Siegel; ein erneuter Abschluss ist möglich.</p></li></ul></section><section class="history-version"><h3>v1.5.0 <small>18. Oktober 2026</small></h3><ul><li><strong>Profil und freiwilliges Konto</strong><p>Profil und Tauschwerkstatt haben eigene App-Seiten mit Rückweg. Oben findest du Guthaben, Tauschen und Profil nebeneinander; die Tokeninformationen zeigen weiterhin den exakten Betrag. Gast- und Kontospiel bleiben getrennt, eine Übernahme verlangt Vorschau und Sicherung.</p></li><li><strong>Willkommen und Kontoverwaltung</strong><p>Nach bestätigter E-Mail und gestartetem Kontospielstand kannst du einmalig 100 Token im Profil abholen. Ein Löschantrag zeigt die Folgen und den Bearbeitungsstatus; die manuelle Bearbeitung erfolgt innerhalb von sieben Tagen.</p></li><li><strong>Tauschwerkstatt mit Kartenbildern</strong><p>Token erhalten oder eine fehlende Wunschkarte wählen: mit Suche, Seltenheitsfiltern und gut erreichbaren Mengentasten. Mobil stehen drei Karten nebeneinander. Tauschwerte, vier passende Doppelte und die geschützte letzte Kopie bleiben erhalten. Die Versionsübersicht passt sich jetzt auch dem Hellmodus an.</p></li></ul></section><section class="history-version"><h3>v1.4.7 <small>17. Oktober 2026</small></h3><ul><li><strong>Mega-Attacke-Karten tauschen</strong><p>Doppelte Mega-Attacke-Rare-Karten im TCG-Live-Bereich lassen sich jetzt für jeweils 0,8 Token eintauschen. Auch der Wunschtausch ist mit vier passenden Doppelten derselben Seltenheit möglich. Eine Kopie bleibt geschützt.</p></li></ul></section><section class="history-version"><h3>v1.4.6 <small>16. Oktober 2026</small></h3><ul><li><strong>Navigation korrekt markiert</strong><p>Promos wird nur noch als aktiv hervorgehoben, während das Promo-Album geöffnet ist.</p></li><li><strong>Sammlungsverwaltung aufgeräumt</strong><p>Die Schaltflächen zum Zurücksetzen einer Sammlung oder aller Sets sind vorerst in allen Kartenwelten ausgeblendet. Albumfilter lassen sich weiterhin zurücksetzen.</p></li></ul></section><section class="history-version"><h3>v1.4.5 <small>15. Oktober 2026</small></h3><ul><li><strong>Kartenansicht im Querformat verbessert</strong><p>Die Kartengröße berücksichtigt Varianten und Bestandsinformationen. So bleibt Schließen auch im kleinen Querformat vollständig sichtbar.</p></li></ul></section><section class="history-version"><h3>v1.4.4 <small>15. Oktober 2026</small></h3><ul><li><strong>Deine Sammlung, klarer im Blick</strong><p>Einheitliche Navigation und Albumfilter in allen Kartenwelten: Suche, mehrere Seltenheiten und Sammlungsstatus auf einer einklappbaren Fläche. Promos findest du direkt neben dem Album.</p></li><li><strong>Promos gezielt ergänzen</strong><p>Neue Promo-Angebote enthalten nur noch fehlende Karten. Bereits gespeicherte Auswahlen bleiben einmal unverändert einlösbar; verdiente Ansprüche bleiben erhalten. Promo-Karten lassen sich wie im Pokémon-Album durchblättern.</p></li></ul></section><section class="history-version"><h3>v1.4.3 <small>15. Oktober 2026</small></h3><ul><li><strong>Android-Installation vorbereitet</strong><p>Name, App-Symbol und Start im eigenen App-Fenster sind für die Installation über den Android-Browser vorbereitet. Die bisherige App-Adresse und deine Spielstände bleiben erhalten.</p></li></ul></section><section class="history-version"><h3>v1.4.2 <small>14. Oktober 2026</small></h3><ul><li><strong>Versionsanzeige korrigiert</strong><p>Die App und die Übersicht der Neuerungen zeigen den aktuellen Stand der 1.4-Reihe. Deine Sammlungen und Token bleiben erhalten.</p></li></ul></section><section class="history-version"><h3>v1.4.1 <small>14. Oktober 2026</small></h3><ul><li><strong>Kompaktere mobile Set-Auswahl</strong><p>Kleinere Set-Kacheln zeigen mehr Erweiterungen auf einen Blick. Setnamen, Sammlung und Prozentwerte bleiben sichtbar.</p></li><li><strong>Farbiger Sammlungsfortschritt</strong><p>Blaue Balken begleiten deine Sammlung; vollständig gesammelte Sets werden grün markiert. In Hell- und Dunkelmodus.</p></li></ul></section><section class="history-version"><h3>v1.4.0 <small>13. Oktober 2026</small></h3><ul><li><strong>Promo-Alben und Sammelaufträge</strong><p>Eigene Promo-Sets für Pocket und TCG Live. Je 20 neue Packs wählst du eine von drei Karten; Auswahl und Fortschritt bleiben gespeichert.</p></li><li><strong>Neue Kartenwelten – hell und dunkel</strong><p>Eigene Farben je TCG, mobile Kartenwelt- und Set-Auswahl, klarere Alben und besser lesbare Texte. Pocket und TCG Live erhalten eigene ruhige Kartenrücken.</p></li><li><strong>Stärkere Premium-Displays und Opening-Filter</strong><p>Angepasste Premium-Garantien für Lorcana und One Piece, individuelle Hit-Filter und „Nur neue Karten“. Details findest du unter „Alle Neuerungen ansehen“.</p></li><li><strong>Deine bisherigen Spielstände bleiben erhalten</strong><p>Sammlungs-IDs, Kartenmengen und Token-Guthaben bleiben bestehen. Lorcana zählt frühere Normal- und Foil-Kopien gemeinsam und verwendet den geprüften deutschen Katalog. Zusätzliche Speicherung betrifft nur die neuen Promo-Aufträge.</p></li></ul></section><section class="history-version"><h3>v1.3.2 <small>13. Oktober 2026</small></h3><ul><li><strong>Besser lesbare Texte in beiden Modi</strong><p>Promo-Einstieg und Suchhinweise sind im Dunkelmodus heller. Nebeninfos und Navigation sind im Hellmodus kräftiger; Öffnungsbuttons haben klareren Kontrast. Einheitliche Textfarben für neue Oberflächen.</p></li><li><strong>Eigene Kartenrücken für Pocket und TCG Live</strong><p>Die Startseiten-Symbole begleiten jetzt deine Openings: Pocket mit Mint/Creme, TCG Live mit Prismablau. Ruhige Kartenrücken ohne Glanz oder Animation, passend zu Hell- und Dunkelmodus.</p></li><li><strong>Ruhiger App-Start und bereinigte Alben</strong><p>Kein kurzes Lorcana-Aufblitzen vor der Startseite. Die mobile Setwahl in Pocket und TCG Live nutzt die verfügbare Feldbreite. Lorcana und One Piece zeigen auch nach Filtern und Setwechseln keine Namen- oder Mengenzeilen unter den Karten.</p></li><li><strong>Eigene Promo-Sammlungen und wiederholbare Aufträge</strong><p>1.568 Promokarten mit geprüftem Bildmaterial: 220 für Pocket und 1.348 im TCG-Live-Bereich. Eigenständige Promo-Sets, ohne Zuordnung zu regulären Erweiterungen. Je 20 seit Einführung geöffnete Packs entsteht eine Auswahl: gewünschtes Promo-Set auswählen, drei verschiedene Karten ansehen und eine erhalten. Mindestens eine angebotene Karte fehlt noch, sofern im Set verfügbar. Einzelpacks, 10er-Openings und Premium-Displays zählen nach Packzahl, ohne rückwirkende Anrechnung. Erfüllte Aufträge und begonnene Auswahlen bleiben gespeichert. Eigene Promo-Mengen; kein Token-Tausch. Englische Bilder/Namen sind gekennzeichnet. 37 ungeklärte Bilder intern erhalten, aus Album und Belohnungspool ausgeschlossen.</p></li><li><strong>Kartenwelt-Design und mobile Navigation</strong><p>Einheitliche helle Oberflächen mit Rosa/Violett für Monster Cards, Mint/Creme für Pocket, Eisblau/Türkis für TCG Live, Türkis/Lavendel für Lorcana und Meerblau/Sandgold für One Piece. Ein Mond-/Sonnenbutton schaltet den appweiten Hell-/Dunkelmodus um; die Wahl bleibt beim TCG-Wechsel und nach Neuladen erhalten. Auf dem Handy ersetzt eine Auswahl mit allen fünf TCGs die schiebbare obere Leiste. Booster und Sammlungsdaten bleiben unverändert. Die Kopfzeile zeigt keine doppelten Monster-Cards-Sammlungs-/Pack-Zähler mehr; im Album stehen Fortschritt und geöffnete Packs über den Filtern. Lorcana zeigt wie Pokémon eine Set-/Pack-Übersicht sowie gesammelte Karteneinträge je Seltenheit statt technischer Kataloghinweise. Mobil zeigt Lorcana wie die übrigen TCG-Alben drei Karten je Zeile.</p></li><li><strong>Mobil entspannt zwischen Sets wechseln</strong><p>Die Set-Auswahl öffnet auf schmalen Bildschirmen und Touch-Geräten ohne automatischen Fokus im Suchfeld. Damit verdeckt die Bildschirmtastatur nicht sofort die Set-Kacheln. Erst Antippen aktiviert die Suche. Am Desktop wird das Suchfeld weiterhin direkt fokussiert. Gilt für Packs und Album in Pocket, TCG Live, Lorcana und One Piece.</p></li><li><strong>Pack-Infos, Alben und Geschenk-Hinweis aufgeräumt</strong><p>Packaufbau, Modellchancen, Duplikatschutz, Premium-Garantien, Spezialpacks und Quellen werden einheitlich aus den aktuellen App-Profilen dargestellt. Veraltete Aussagen zu Display-Garantien und Katalogständen sind entfernt. Lorcana und One Piece zeigen bei fehlenden Karten Nummer, Name und Seltenheit direkt auf der Karte; die separaten Namen- und Mengenzeilen unter Albumkarten entfallen. Das 100-Token-Geschenk wird nach dem Abholen ausgeblendet, auch nach Neuladen. Die Startseite verwendet für alle TCGs einheitlich „Karteneinträge gesammelt“; die Zählweise bleibt unverändert.</p></li><li><strong>Premium-Garantien für Lorcana und One Piece angepasst</strong><p>Lorcana: 24 Packs für 40 Token mit mindestens 6 Epischen, 4 Legendären und 1 Verzauberten. Sets mit Mythisch garantieren zusätzlich 1 Mythische. Ikonisch bleibt eine zufällige Überraschung. One Piece: 24 Packs für 30 Token mit mindestens 6 Standard-SR, 1 Standard-SEC und 2 Alternate-Art-/Parallelkarten; PRB-01 enthält 20 Packs für 25 Token mit denselben Mindesttreffern. Keine Doppelanrechnung zwischen Standard- und Parallel-Garantien. Natürlich gezogene zusätzliche Treffer bleiben erhalten. Eigene Webapp-Garantien, keine offiziellen Display-Pull-Rates.</p></li><li><strong>Visuelle Set-Auswahl in vier Kartenwelten</strong><p>Pocket, Pokémon TCG Live, Lorcana und One Piece zeigen Sets als Kacheln mit Sammlungsfortschritt. Suche nach Namen oder Kürzel, grenze nach Serie ein und kehre über zuletzt verwendete Sets schnell zurück. Die Auswahl funktioniert bei Packs und im Album. Pocket-Booster wählst du anschließend unter der Erweiterung. Lorcana und One Piece verwenden einheitliche Set-Kürzel, auch unter „Zuletzt verwendet“; dort gibt es keine Karten- oder Coverbilder. Noch nicht geladene Kataloge sind gekennzeichnet; bestehende Kopien und Token bleiben erhalten.</p></li><li><strong>Lorcana: eine Sammlung je Kartenmotiv</strong><p>Normal- und Foil-Kopien werden gemeinsam gezählt. Deine bisherigen Kopien bleiben vollständig erhalten; besondere Illustrationen bleiben eigene Karten.</p></li><li><strong>Neuer Foil-Look für besondere Lorcana-Karten</strong><p>Episch, Legendär, Mythisch, Verzaubert und Ikonisch erhalten einen durchgängigen Foil-Effekt über der gesamten Karte. Die höchsten Seltenheiten behalten ihre Originalfarben; Regenbogen und Gold liegen in beweglichen Glanzreflexen. In der Großansicht und beim Aufdecken wandert der Glanz ruhig weiter. Auch auf dem Handy bedienbar, ohne separate Foil-Sammelvariante. Ergänzt am 13. Oktober: Legendär mit warmem Satin-Goldglanz zwischen Episch und Mythisch; die anderen Stufen bleiben unverändert.</p></li><li><strong>Deutscher Lorcana-Katalog korrigiert</strong><p>Verwechselte Promo-Bilder wurden durch die passenden deutschen Setkarten ersetzt. Auch die vier Zusatzdrucke aus Die große Honigrettung sind jetzt mit deutschen Originalbildern zugeordnet und im Webapp-Modell wieder ziehbar. Vorhandene Kopien bleiben erhalten.</p></li><li><strong>Lorcana-Filter und Tausch vereinheitlicht</strong><p>Fortschritt, neue Karten und Doppelte beziehen sich auf das Kartenmotiv. Hit-Regeln und Tauschwerte richten sich nach der Seltenheit; die separate Foil-Auswahl entfällt.</p></li><li><strong>Pack-Token-Icon verbessert</strong><p>Ein helles Booster-Symbol ersetzt den dunklen Balken in der Token-Münze – im Guthaben und im Infofenster.</p></li></ul></section><section class="history-version"><h3>v1.3.1 <small>Vorherige Neuerungen</small></h3><ul><li><strong>Deine Kartenwelten auf der Startseite</strong><p>Wechsle schnell zwischen den fünf Kartenwelten und sieh deine Sammlungszahlen und Fortschrittsbalken. Die Startseite zeigt außerdem die letzten Neuerungen.</p></li><li><strong>Opening-Filter für jedes Set</strong><p>Lege fest, welche Seltenheiten als Hits zählen – mit derselben Auswahl und Reihenfolge wie im Album. Beim 10er-Opening werden nur die passenden Treffer einzeln gezeigt; alle gezogenen Karten werden gesammelt.</p></li><li><strong>Nur neue Karten anzeigen</strong><p>Die Checkbox im Opening-Filter zeigt ausschließlich erstmals gesammelte Karten, unabhängig von ihrer Seltenheit. Mehrfach gezogene Kopien derselben neuen Karte gelten nur beim ersten Mal als neu. Verfügbar in allen Kartenwelten.</p></li><li><strong>Übersichtlichere Öffnungen</strong><p>Der sichtbare Stapel enthält maximal acht Karten, damit Hinweise lesbar bleiben. Nach einem einzelnen Pack, einem 10er-Opening oder einem Premium-Display kannst du direkt zur Boosterauswahl zurückkehren.</p></li><li><strong>Premium-Displays mit garantierten Hits</strong><p>Für Pokémon TCG Live, Lorcana und One Piece gibt es Premium-Displays gegen zusätzliche Pack-Token. Vor dem Kauf siehst du den Preis und die garantierten Mindesttreffer des gewählten Sets.</p></li><li><strong>Seltene God-Pack-Überraschungen</strong><p>In unterstützten Sets können zufällig besondere Packs auftauchen: Pokémon 151, Prismatische Entwicklungen und One Piece PRB-01. Der Inhalt hängt vom Set ab. God Packs sind nicht separat kaufbar; bei Lorcana gibt es keine God Packs.</p></li><li><strong>Doppelte bequem am Handy tauschen</strong><p>Wähle Mengen mit Plus, Minus oder Max statt Tippen in einzelnen Feldern. Tausche Doppelte gegen Token oder genau vier passende Doppelte gegen eine fehlende Wunschkarte. Mindestens eine Kopie bleibt erhalten.</p></li><li><strong>Ein Dankeschön: 100 Token</strong><p>Auf der Startseite kannst du bis zum 18. Oktober 2026 einmalig 100 zusätzliche Pack-Token abholen.</p></li></ul></section></div><footer><button type="button" id="versionHistoryDone">Alles klar</button></footer></dialog>
 <script id="version-history-script">(()=>{
  function init(){
   const button=document.getElementById('versionHistoryOpen'),dialog=document.getElementById('versionHistoryDialog'),badge=document.getElementById('versionHistoryNew');if(!button||!dialog)return;
