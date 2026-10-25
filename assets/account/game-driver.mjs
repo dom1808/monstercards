@@ -43,6 +43,11 @@ function validateGameChange(before,after,command,catalog){
   }
   if(command.kind==='trade-wish'){const target=catalog(d.set,d.target);if(!target||target.promo||!target.eligible||target.group!==group||qty!==4||target.ids.some(id=>old.owned[id]>0)||target.ids.reduce((n,id)=>n+(actual.owned[id]||0),0)!==1)throw Error('Ungültige Wunschkarte');for(const id of target.ids)if(Object.hasOwn(actual.owned,id))wanted.owned[id]=actual.owned[id];}
   else {if(d.units!==units)throw Error('Tauschwert widerspricht Katalog');expected.wallet.units+=units;}
+ }else if(command.kind==='reset-set'){
+  if(!catalog.resetAllowed?.(d.world,d.set))throw Error('Kein freigegebenes reguläres Reset-Set');
+  const world=({mcp:'mcp',pocket:'pocket',live:'live',lc:'lorcana',op:'onepiece'})[d.world];
+  if(!world||d.world==='mcp'&&d.set!=='mcp')throw Error('Ungültiges Reset-Ziel');
+  if(world==='mcp')expected.collections.mcp={owned:{},packs:0};else expected.collections[world].sets[d.set]={owned:{},packs:0};
  }else if(command.kind==='aux'){expected.aux=clone(after.aux);
  }else if(command.kind==='promo'){
   const old=before.promos[d.world],actual=after.promos[d.world];if(!old||old.packs!==actual.packs)throw Error('Ungültiger Promovorgang');
