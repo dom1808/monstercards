@@ -3,7 +3,7 @@ import {EMPTY,clone,encode,canonical,digest,validate} from './app-snapshot.mjs';
 const keyTarget=key=>{
  if(key==='mcp_save_v1')return ['mcp'];if(key==='mcp_tcg_save_v1')return ['pocket'];if(key==='mcp_live_save_v1')return ['live'];
  if(key==='mcp_lorcana_save_v1')return ['lorcana','lc1'];const lc=key.match(/^mcp_lorcana_(lc\d+)_save_v1$/);if(lc)return ['lorcana',lc[1]];
- if(key==='mcp_op01_test_save_v1')return ['onepiece','op01'];const op=key.match(/^mcp_((?:op|prb)\d+)_save_v1$/);if(op)return ['onepiece',op[1]];return null;
+ if(key==='mcp_op01_test_save_v1')return ['onepiece','op01'];const op=key.match(/^mcp_((?:op|prb)\d+|eb(?:03|05))_save_v1$/);if(op)return ['onepiece',op[1]];return null;
 };
 export function applyGameRecords(before,changes){
  const data=clone(before),seen=new Set();for(const {key,value} of changes){if(seen.has(key)||typeof value!=='string')throw Error('Ungültige Spielbuchung');seen.add(key);const parsed=JSON.parse(value),target=keyTarget(key);
@@ -18,7 +18,7 @@ export function applyGameRecords(before,changes){
 export function gameRecords(data){
  validate(data);const records={'mcp_save_v1':JSON.stringify({v:2,...data.collections.mcp}),'mcp_tcg_save_v1':JSON.stringify({sets:data.collections.pocket.sets,lang:'de'}),'mcp_live_save_v1':JSON.stringify({sets:data.collections.live.sets,lang:'de'}),'mcp_rewards_v60':JSON.stringify(data.wallet),'mcp_promo_rewards_v1':JSON.stringify(data.promos)};
  for(const [id,save]of Object.entries(data.collections.lorcana.sets)){if(!/^lc\d+$/.test(id))throw Error('Set hat noch keine bestätigte App-Speicherzuordnung: '+id);records[id==='lc1'?'mcp_lorcana_save_v1':'mcp_lorcana_'+id+'_save_v1']=JSON.stringify(save);}
- for(const [id,save]of Object.entries(data.collections.onepiece.sets)){if(!/^(op|prb)\d+$/.test(id))throw Error('Set hat noch keine bestätigte App-Speicherzuordnung: '+id);records[id==='op01'?'mcp_op01_test_save_v1':'mcp_'+id+'_save_v1']=JSON.stringify(save);}
+ for(const [id,save]of Object.entries(data.collections.onepiece.sets)){if(!/^(?:(?:op|prb)\d+|eb(?:03|05))$/.test(id))throw Error('Set hat noch keine bestätigte App-Speicherzuordnung: '+id);records[id==='op01'?'mcp_op01_test_save_v1':'mcp_'+id+'_save_v1']=JSON.stringify(save);}
  if(data.aux.decks!==null)records.mcp_decks_v1=JSON.stringify(data.aux.decks);if(data.aux.battle!==null)records.mcp_battle_v1=JSON.stringify(data.aux.battle);return records;
 }
 export function readGameRecords(records){return applyGameRecords(clone(EMPTY),Object.entries(records).map(([key,value])=>({key,value})));}

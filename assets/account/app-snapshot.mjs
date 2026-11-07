@@ -10,7 +10,7 @@ function keys(x, allowed) { if (!plain(x) || Object.keys(x).some(k=>!allowed.inc
 // Diese IDs bleiben unverändert. Ausnahme nur im zugehörigen One-Piece-Set;
 // andere IDs behalten 160 Zeichen, Daten-/Fragmentbudgets bleiben bestehen.
 function sourcePrintId(id,setId) {
-  if(typeof setId!=='string'||!/^(?:op|prb)\d+$/.test(setId)||id.length>512||!id.startsWith(setId+'-')) return false;
+  if(typeof setId!=='string'||!/^(?:(?:op|prb)\d+|eb(?:03|05))$/.test(setId)||id.length>512||!id.startsWith(setId+'-')) return false;
   const match=/^([A-Za-z0-9_.-]+)_source_([a-f0-9]+)$/.exec(id.slice(setId.length+1));
   if(!match||match[2].length%2) return false;
   try {
