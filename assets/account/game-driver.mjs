@@ -66,7 +66,7 @@ export function createGameDriver({account,scope,readLocal,catalog=()=>null}){
  async function commit(command){guard();if(command.uid!==uid||!base||command.baseRevision!==base.meta.revision)throw Error('Vorgang gehört zu anderem Stand');
   const data=validateGameChange(base.data,applyGameRecords(base.data,command.changes),command,catalog),redeem=command.kind==='promo'&&base.data.promos[command.details.world].pending!==null,kind=command.kind==='trade-tokens'?'trade':redeem?'promo':'save',units=kind==='trade'?command.details.units:0,claimId=redeem?command.details.world+'-'+data.promos[command.details.world].claimed:'';
   if(redeem&&command.id!=='promo-'+claimId)throw Error('Falsche einmalige Promo-Belegkennung');
-  const binding={uid,kind:'game-'+kind,source:base.meta.dataDigest,proof:await proof(command),units};await account.commitGame(data,{operationId:command.id,expected:base.meta,kind,binding,claimId});guard();return {uid,operationId:command.id,committed:true};
+  const binding={uid,kind:'game-'+kind,source:base.meta.dataDigest,proof:await proof(command),units};await account.commitGame(data,{operationId:command.id,expected:base.meta,kind,binding,claimId,openedPacks:command.kind==='open'?command.details.packs:0});guard();return {uid,operationId:command.id,committed:true};
  }
  async function resolve(command){guard();if(command.uid!==uid)throw Error('Fremder Vorgang');const receipt=await getDocFromServer(op(command.id));guard();
   if(receipt.exists()){const r=receipt.data();if(r.revision!==command.baseRevision+1||r.binding?.uid!==uid||r.binding?.proof!==await proof(command))throw Error('Vorgangsbeleg passt nicht');return {uid,operationId:command.id,committed:true};}

@@ -2,12 +2,24 @@ import {createIntegration} from './client.mjs';
 import {createGameDriver,gameRecords,readGameRecords} from './game-driver.mjs';
 import {clone,encode,canonical,summary} from './app-snapshot.mjs';
 import {sendEmailVerification,reload} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js';
+import {createRoundService,roundAvailable} from './rounds.mjs';
 export function createRuntime({storage,config}){
  if(document.documentElement.dataset.mcpBuild==='developer')throw Error('Dev-Spielstände sind von Konten ausgeschlossen');
  const io=storage.localStorage,selectedKey='mcp_account_selected_v150';let usable=false;try{io?.setItem('mcp_account_probe_v150','1');usable=io?.getItem('mcp_account_probe_v150')==='1';io?.removeItem('mcp_account_probe_v150');}catch{}
  const account=createIntegration({target:config.target||'spark',config:config.firebase,confirmation:config.target==='spark-empty-test'?'LEERE TESTSPIELSTÄNDE':undefined,persistent:usable,deviceStore:io,build:'normal'});
- let view={signedIn:false,selected:false,verified:false,started:false,canWrite:false,name:'Spieler',welcome:false,deletion:false,storageReady:usable,notice:''},prepared=null,catalog=null,driver=null;
+ let view={signedIn:false,selected:false,verified:false,started:false,canWrite:false,name:'Spieler',welcome:false,deletion:false,storageReady:usable,notice:''},prepared=null,catalog=null,driver=null,roundService=null,roundGate=null,roundUid=null;
  const emit=()=>window.dispatchEvent(new Event('mcp-account-change'));
+ async function setupRounds(close=false){
+  const uid=account.auth.currentUser?.uid;
+  if(config.rounds!==true||account.live||!uid||storage.accountUid!==uid||!view.verified||!view.started||view.deletion){account.roundsEnabled=false;roundService=null;view.rounds=false;view.roundsNotice='Die Sammlerrunde ist nur im bestätigten Kontospiel verfügbar.';return;}
+  if(roundUid!==uid){roundUid=uid;roundGate=null;roundService=null;account.roundsEnabled=false;}
+  if(!roundGate)roundGate=roundAvailable(account).then(enabled=>{if(account.auth.currentUser?.uid!==uid||storage.accountUid!==uid)throw Error('Konto gewechselt');account.roundsEnabled=enabled;view.rounds=enabled;view.roundsNotice=enabled?'':'Sammlerrunde noch nicht freigeschaltet. Packs funktionieren weiterhin; die Monatszählung beginnt mit der Freischaltung.';roundService=enabled?createRoundService(account,{enabled:true}):null;return enabled;}).catch(e=>{roundGate=null;account.roundsEnabled=false;view.rounds=false;view.roundsNotice='Sammlerrunde nicht erreichbar · erneut verbinden';throw e;});
+  await roundGate;
+  if(close&&roundService){try{await roundService.onAppStart();}catch(e){view.roundsNotice='Monatsabschluss nicht abgeschlossen · beim nächsten Start erneut versuchen';}}
+ }
+ async function rounds(){await setupRounds();if(!roundService)throw Error(view.roundsNotice||'Sammlerrunde nicht verfügbar');return roundService;}
+ const roundStatus=async()=>{const r=await rounds();return r.status();},roundList=async p=>{const r=await rounds();return r.list(p);},roundJoin=async options=>{const r=await rounds();return r.join(options);},roundShare=async()=>{const r=await rounds();return r.share();},roundLeave=async()=>{const r=await rounds();return r.leave();};
+ const roundCached=()=>roundService?.cached()||null,roundScope=()=>{if(!roundService||account.auth.currentUser?.uid!==storage.accountUid)throw Error('Konto gewechselt');return roundService.scope();};
  const requireStorage=()=>{if(!usable)throw Error('Dauerhaftes Speichern ist gesperrt. Gastspielen bleibt möglich.');};
  function select(uid){io.setItem(selectedKey,uid);if(io.getItem(selectedKey)!==uid)throw Error('Kontowahl nicht dauerhaft gespeichert');}
  function getState(){const user=account.auth.currentUser;return {...view,pendingImport:!!user&&!!io?.getItem('mcp_account_import_pending_v150:'+user.uid),hasProgress:account.cache?.meta.hasProgress,imported:account.cache?.meta.imported,signedIn:!!user,verified:user?.emailVerified===true,selected:!!storage.accountUid&&(!user||user.uid===storage.accountUid),canWrite:!!user&&user.uid===storage.accountUid&&account.status==='Gespeichert'&&account.online&&!view.deletion,name:account.cache?.meta.name||view.name};}
@@ -20,6 +32,7 @@ export function createRuntime({storage,config}){
   if(selected&&selected!==account.auth.currentUser.uid)io.removeItem(selectedKey);
   account.restoreDeviceLease();await refresh();
   if(selected&&account.auth.currentUser.uid===selected){if(view.deletion){storage.activateCachedAccount(selected);view.notice='Löschung angefragt · Bearbeitung innerhalb von sieben Tagen';}else if(view.started){if(account.status==='Gespeichert'&&!account.live)await account.claimDaily();storage.activateAccount(selected,gameRecords(account.cache.data));}else{io.removeItem(selectedKey);}}
+  try{await setupRounds(true);}catch(e){view.roundsNotice='Sammlerrunde nicht erreichbar · erneut verbinden';}
   account.onChange=()=>{view.notice=account.status;emit();};emit();
  }
  async function signIn(email,password){requireStorage();io.setItem('mcp_account_used_v150','1');await account.login(email,password);
@@ -33,7 +46,7 @@ export function createRuntime({storage,config}){
  async function startEmpty(){requireStorage();await refresh();await account.startEmpty();select(account.auth.currentUser.uid);location.reload();}
  async function openAccount(){requireStorage();await refresh();if(!view.started||view.deletion)throw Error('Kein freigegebener Kontospielstand');select(account.auth.currentUser.uid);location.reload();}
  async function takeOver(){await account.takeOver();if(storage.accountUid)location.reload();else await refresh();}
- async function logout(){await account.logout();io?.removeItem(selectedKey);view={...view,signedIn:false,selected:false,notice:'Abgemeldet.'};location.reload();}
+ async function logout(){roundService=null;roundGate=null;roundUid=null;account.roundsEnabled=false;await account.logout();io?.removeItem(selectedKey);view={...view,signedIn:false,selected:false,rounds:false,notice:'Abgemeldet.'};location.reload();}
  async function claimWelcome(){if(window.MCPGameBoundary?.state().pending)throw Error('Zuerst ausstehende Speicherung klären');await account.claimWelcome();await refresh();wallet();}
  async function claimGift(){if(window.MCPGameBoundary?.state().pending)throw Error('Zuerst ausstehende Speicherung klären');await account.claimGift();await refresh();wallet();window.MCP?.v150?.refreshGift?.();}
  async function rename(name){await account.rename(name);await refresh();}
@@ -52,7 +65,7 @@ export function createRuntime({storage,config}){
  async function submitDeletion(password,confirmed){if(!confirmed)throw Error('Bitte die Folgen bestätigen');await account.submitDeletionRequest(password,'KONTOLÖSCHUNG BEANTRAGEN');await refresh();view.notice='Löschung angefragt · Bearbeitung innerhalb von sieben Tagen. Abschluss über euren bestehenden privaten Kontakt.';emit();}
  async function deletionStatus(){return account.deletionRequestStatus();}
  async function resolvePending(){await account.takeOver();if(!driver)await installGame(catalog);await window.MCPGameBoundary.resolve(driver);location.reload();}
- async function prepareAction(){if(!driver||!storage.accountUid)throw Error('Kontospielstand noch nicht geladen');const loaded=await account.load();if(account.status!=='Gespeichert'||loaded.meta.deletionRequested)throw Error('Nur Ansicht: Gerät zuerst übernehmen');if(!account.live){await account.claimDaily();wallet();}}
- window.addEventListener('offline',()=>{account.offline(true).then(()=>{view.notice='Offline · Sammlung nur ansehen';emit();});});window.addEventListener('online',()=>{account.offline(false).then(()=>{view.notice='Verbindung wieder da · aktuellen Stand laden';emit();});});
- return Object.freeze({state:getState,boot,signIn,sendVerification,checkVerification,resetPassword,startEmpty,openAccount,takeOver,logout,defer:logout,claimWelcome,claimGift,rename,inspectImport,importSelected,submitDeletion,deletionStatus,resolvePending,prepareAction,installGame});
+ async function prepareAction(){if(!driver||!storage.accountUid)throw Error('Kontospielstand noch nicht geladen');const loaded=await account.load();if(account.status!=='Gespeichert'||loaded.meta.deletionRequested)throw Error('Nur Ansicht: Gerät zuerst übernehmen');await setupRounds();if(!account.live){await account.claimDaily();wallet();}}
+ window.addEventListener('offline',()=>{account.offline(true).then(()=>{view.notice='Offline · Sammlung nur ansehen';emit();});});window.addEventListener('online',()=>{roundGate=null;account.offline(false).then(async()=>{try{await setupRounds();}catch{}view.notice='Verbindung wieder da · aktuellen Stand laden';emit();});});
+ return Object.freeze({state:getState,boot,signIn,sendVerification,checkVerification,resetPassword,startEmpty,openAccount,takeOver,logout,defer:logout,claimWelcome,claimGift,rename,inspectImport,importSelected,submitDeletion,deletionStatus,resolvePending,prepareAction,installGame,roundStatus,roundList,roundJoin,roundShare,roundLeave,roundCached,roundScope});
 }

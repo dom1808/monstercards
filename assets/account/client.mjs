@@ -1,3 +1,4 @@
+import {berlinPeriod,serverPeriod} from './rounds.mjs';
 import {initializeApp,deleteApp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js';
 import {initializeAuth,inMemoryPersistence,indexedDBLocalPersistence,browserLocalPersistence,connectAuthEmulator,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendEmailVerification,sendPasswordResetEmail,reload,updateProfile,EmailAuthProvider,reauthenticateWithCredential} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js';
 import {initializeFirestore,memoryLocalCache,connectFirestoreEmulator,doc,getDocFromServer,runTransaction,disableNetwork,enableNetwork,onSnapshot,serverTimestamp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-firestore.js';
@@ -168,10 +169,10 @@ class AccountLabor {
     return this.#commit(data,{action:'reward',claimId,operationId,expected:loaded.meta,afterCommit});
   }
   async welcomeClaimed(){const uid=this.#user().uid;return (await getDocFromServer(this.#ref(uid,'operations','reward-welcome-v150'))).exists();}
-  async commitGame(data,{operationId,expected,kind,binding,claimId='',afterCommit}={}){
+  async commitGame(data,{operationId,expected,kind,binding,claimId='',afterCommit,openedPacks=0}={}){
     if(this.live)throw Error('Spielaktionen im bestehenden Spark-Test noch gesperrt');
     if(!['save','trade','promo'].includes(kind))throw Error('Unbekannte Spielbuchung');
-    return this.#commit(data,{action:kind,operationId,expected,binding,claimId,afterCommit});
+    if(!Number.isSafeInteger(openedPacks)||openedPacks<0)throw Error('Ungültige Packanzahl');const counted=this.roundsEnabled===true&&openedPacks>0,args={action:kind,operationId,expected,binding,claimId,afterCommit,openedPacks:counted?openedPacks:0};const period=berlinPeriod(new Date());try{return await this.#commit(data,{...args,countPeriod:period});}catch(e){if(!counted||e.code!=='permission-denied')throw e;const corrected=await serverPeriod(this);if(corrected===period)throw e;return this.#commit(data,{...args,countPeriod:corrected});}
   }
   async claimDaily({now=new Date()}={}){
     if(this.live)throw Error('Tagesgutschrift im Spark-Test gesperrt');
@@ -207,7 +208,7 @@ class AccountLabor {
     const claimId=world+'-'+p.claimed;
     return this.#commit(data,{action:'promo',claimId,operationId:ticket.id,binding,expected:loaded.meta});
   }
-  async #commit(data,{action,expected,initialize=false,operationId=unique(),claimId='',binding,afterCommit}) {
+  async #commit(data,{action,expected,initialize=false,operationId=unique(),claimId='',binding,afterCommit,openedPacks=0,countPeriod}) {
     const uid=this.#user().uid;this.#assert(uid);
     if(expected.deletionRequested)throw Error('Löschung beantragt: Konto gesperrt');
     checkId(operationId);
@@ -227,7 +228,7 @@ class AccountLabor {
           return {alreadyCommitted:true};
         }
         if(old.revision!==expected.revision) throw Error('Versionskonflikt: erst aktuellen Stand laden');
-        if(action==='import'&&(old.imported||old.hasProgress)) throw Error('Einmalige Übernahme nicht mehr möglich');
+        if(action==='import'&&(old.imported||old.hasProgress)) throw Error('Einmalige Übernahme nicht mehr möglich');let monthRef=null,monthValue=null;if(openedPacks>0){monthRef=this.#ref(uid,'roundMonths',countPeriod);const prior=await tx.get(monthRef),value=prior.exists()?prior.data().packs:0;if(!Number.isSafeInteger(value)||value<0||!Number.isSafeInteger(value+openedPacks))throw Error('Monatsstand ungültig');monthValue={schema:1,period:countPeriod,packs:value+openedPacks,updatedAt:serverTimestamp()};}
         if(!initialize&&old.epoch!==lease.epoch) throw Error('Nur Ansicht: anderes Gerät aktiv');
         const m={...old,dailyDay:data.wallet.lastDay,giftClaimed:data.wallet.gifts?.['thanks-2026-10']===true,stage:'active',revision:old.revision+1,dataRevision:old.revision+1,epoch:lease.epoch,hasProgress:action!=='empty',
           imported:old.imported||action==='import',importDigest:action==='import'?encoded.digest:old.importDigest,dataDigest:encoded.digest,walletUnits:data.wallet.units,
@@ -236,7 +237,7 @@ class AccountLabor {
         encoded.fragments.forEach((fragment,i)=>tx.set(this.#ref(uid,'snapshots',String(i)),{generation:m.dataRevision,fragment}));
         tx.set(this.#ref(uid,'private','proof'),{secret:lease.secret,epoch:m.epoch,revision:m.revision});
         if(initialize) tx.set(this.#ref(uid,'private','lease'),{secret:lease.secret,epoch:m.epoch});
-        tx.set(opRef,{kind:action,revision:m.revision,digest:m.dataDigest,claimId,...(binding?{binding}: {})});
+        tx.set(opRef,{kind:action,revision:m.revision,digest:m.dataDigest,claimId,...(binding?{binding}: {})});if(monthRef)tx.set(monthRef,monthValue);
         return {alreadyCommitted:false};
       });
       this.#lease=lease;this.persistDeviceLease();
