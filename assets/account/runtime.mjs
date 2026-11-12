@@ -1,3 +1,5 @@
+import {createPersonalService} from './personal-sync.mjs';
+import {createPersonalController} from './personal-lists.mjs';
 import {createIntegration} from './client.mjs';
 import {createGameDriver,gameRecords,readGameRecords} from './game-driver.mjs';
 import {clone,encode,canonical,summary} from './app-snapshot.mjs';
@@ -9,6 +11,19 @@ export function createRuntime({storage,config}){
  const account=createIntegration({target:config.target||'spark',config:config.firebase,confirmation:config.target==='spark-empty-test'?'LEERE TESTSPIELSTÄNDE':undefined,persistent:usable,deviceStore:io,build:'normal'});
  let view={signedIn:false,selected:false,verified:false,started:false,canWrite:false,name:'Spieler',welcome:false,deletion:false,storageReady:usable,notice:''},prepared=null,catalog=null,driver=null,roundService=null,roundGate=null,roundUid=null;
  const emit=()=>window.dispatchEvent(new Event('mcp-account-change'));
+ let personalController=null,personalUid=null;
+ function personalConnect(){
+  const uid=account.auth.currentUser?.uid;
+  if(config.personalSync!==true||!uid||storage.accountUid!==uid||!account.auth.currentUser.emailVerified||view.deletion||account.live||storage.prefix.includes('mcp_dev_v1:')||storage.prefix.includes('mcp_v150_stage:')&&account.production)return null;
+  if(!navigator.locks)throw Error('Kontolisten benötigen sichere lokale Schreibsperren; vorhandene Listen bleiben lokal erhalten');
+  if(personalController&&personalUid===uid)return personalController;
+  personalController?.dispose();personalUid=uid;
+  const scope=()=>{if(account.auth.currentUser?.uid!==uid||storage.accountUid!==uid||account.cache?.meta?.deletionRequested)throw Error('Konto gewechselt oder gesperrt');return uid;};
+  const service=createPersonalService(account,{selected:scope,prefix:storage.prefix,enabled:true});
+  personalController=createPersonalController({uid,io,scope,lock:fn=>storage.requestLock('mcp_personal_sync_v1',fn),service,notify:()=>window.dispatchEvent(new Event('mcp-personal-sync-change'))});
+  return personalController;
+ }
+
  async function setupRounds(close=false){
   const uid=account.auth.currentUser?.uid;
   if(config.rounds!==true||account.live||!uid||storage.accountUid!==uid||!view.verified||!view.started||view.deletion){account.roundsEnabled=false;roundService=null;view.rounds=false;view.roundsNotice='Die Sammlerrunde ist nur im bestätigten Kontospiel verfügbar.';return;}
@@ -67,5 +82,5 @@ export function createRuntime({storage,config}){
  async function resolvePending(){await account.takeOver();if(!driver)await installGame(catalog);await window.MCPGameBoundary.resolve(driver);location.reload();}
  async function prepareAction(){if(!driver||!storage.accountUid)throw Error('Kontospielstand noch nicht geladen');const loaded=await account.load();if(account.status!=='Gespeichert'||loaded.meta.deletionRequested)throw Error('Nur Ansicht: Gerät zuerst übernehmen');await setupRounds();if(!account.live){await account.claimDaily();wallet();}}
  window.addEventListener('offline',()=>{account.offline(true).then(()=>{view.notice='Offline · Sammlung nur ansehen';emit();});});window.addEventListener('online',()=>{roundGate=null;account.offline(false).then(async()=>{try{await setupRounds();}catch{}view.notice='Verbindung wieder da · aktuellen Stand laden';emit();});});
- return Object.freeze({state:getState,boot,signIn,sendVerification,checkVerification,resetPassword,startEmpty,openAccount,takeOver,logout,defer:logout,claimWelcome,claimGift,rename,inspectImport,importSelected,submitDeletion,deletionStatus,resolvePending,prepareAction,installGame,roundStatus,roundList,roundJoin,roundShare,roundLeave,roundCached,roundScope});
+ return Object.freeze({state:getState,boot,signIn,sendVerification,checkVerification,resetPassword,startEmpty,openAccount,takeOver,logout,defer:logout,claimWelcome,claimGift,rename,inspectImport,importSelected,submitDeletion,deletionStatus,resolvePending,prepareAction,installGame,personalConnect,roundStatus,roundList,roundJoin,roundShare,roundLeave,roundCached,roundScope});
 }
