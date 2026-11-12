@@ -1,3 +1,4 @@
+import {prepareCardGift} from './card-gift.mjs';
 import {berlinPeriod,serverPeriod} from './rounds.mjs';
 import {initializeApp,deleteApp} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-app.js';
 import {initializeAuth,inMemoryPersistence,indexedDBLocalPersistence,browserLocalPersistence,connectAuthEmulator,createUserWithEmailAndPassword,signInWithEmailAndPassword,signOut,sendEmailVerification,sendPasswordResetEmail,reload,updateProfile,EmailAuthProvider,reauthenticateWithCredential} from 'https://www.gstatic.com/firebasejs/13.0.0/firebase-auth.js';
@@ -169,10 +170,10 @@ class AccountLabor {
     return this.#commit(data,{action:'reward',claimId,operationId,expected:loaded.meta,afterCommit});
   }
   async welcomeClaimed(){const uid=this.#user().uid;return (await getDocFromServer(this.#ref(uid,'operations','reward-welcome-v150'))).exists();}
-  async commitGame(data,{operationId,expected,kind,binding,claimId='',afterCommit,openedPacks=0}={}){
+  async commitGame(data,{operationId,expected,kind,binding,claimId='',afterCommit,openedPacks=0,cardGift}={}){
     if(this.live)throw Error('Spielaktionen im bestehenden Spark-Test noch gesperrt');
     if(!['save','trade','promo'].includes(kind))throw Error('Unbekannte Spielbuchung');
-    if(!Number.isSafeInteger(openedPacks)||openedPacks<0)throw Error('Ungültige Packanzahl');const counted=this.roundsEnabled===true&&openedPacks>0,args={action:kind,operationId,expected,binding,claimId,afterCommit,openedPacks:counted?openedPacks:0};const period=berlinPeriod(new Date());try{return await this.#commit(data,{...args,countPeriod:period});}catch(e){if(!counted||e.code!=='permission-denied')throw e;const corrected=await serverPeriod(this);if(corrected===period)throw e;return this.#commit(data,{...args,countPeriod:corrected});}
+    if(!Number.isSafeInteger(openedPacks)||openedPacks<0)throw Error('Ungültige Packanzahl');const counted=this.roundsEnabled===true&&openedPacks>0,args={action:kind,operationId,expected,binding,claimId,afterCommit,cardGift,openedPacks:counted?openedPacks:0};const period=berlinPeriod(new Date());try{return await this.#commit(data,{...args,countPeriod:period});}catch(e){if(!counted||e.code!=='permission-denied')throw e;const corrected=await serverPeriod(this);if(corrected===period)throw e;return this.#commit(data,{...args,countPeriod:corrected});}
   }
   async claimDaily({now=new Date()}={}){
     if(this.live)throw Error('Tagesgutschrift im Spark-Test gesperrt');
@@ -208,7 +209,7 @@ class AccountLabor {
     const claimId=world+'-'+p.claimed;
     return this.#commit(data,{action:'promo',claimId,operationId:ticket.id,binding,expected:loaded.meta});
   }
-  async #commit(data,{action,expected,initialize=false,operationId=unique(),claimId='',binding,afterCommit,openedPacks=0,countPeriod}) {
+  async #commit(data,{action,expected,initialize=false,operationId=unique(),claimId='',binding,afterCommit,openedPacks=0,countPeriod,cardGift}) {
     const uid=this.#user().uid;this.#assert(uid);
     if(expected.deletionRequested)throw Error('Löschung beantragt: Konto gesperrt');
     checkId(operationId);
@@ -233,11 +234,12 @@ class AccountLabor {
         const m={...old,dailyDay:data.wallet.lastDay,giftClaimed:data.wallet.gifts?.['thanks-2026-10']===true,stage:'active',revision:old.revision+1,dataRevision:old.revision+1,epoch:lease.epoch,hasProgress:action!=='empty',
           imported:old.imported||action==='import',importDigest:action==='import'?encoded.digest:old.importDigest,dataDigest:encoded.digest,walletUnits:data.wallet.units,
           promoPacks:{pocket:data.promos.pocket.packs,live:data.promos.live.packs},promoClaimed:{pocket:data.promos.pocket.claimed,live:data.promos.live.claimed},lastOp:operationId,action,claimId};
+        const writeGift=cardGift?await prepareCardGift(tx,this,uid,m,cardGift):null;
         tx.set(ref,m);
         encoded.fragments.forEach((fragment,i)=>tx.set(this.#ref(uid,'snapshots',String(i)),{generation:m.dataRevision,fragment}));
         tx.set(this.#ref(uid,'private','proof'),{secret:lease.secret,epoch:m.epoch,revision:m.revision});
         if(initialize) tx.set(this.#ref(uid,'private','lease'),{secret:lease.secret,epoch:m.epoch});
-        tx.set(opRef,{kind:action,revision:m.revision,digest:m.dataDigest,claimId,...(binding?{binding}: {})});if(monthRef)tx.set(monthRef,monthValue);
+        tx.set(opRef,{kind:action,revision:m.revision,digest:m.dataDigest,claimId,...(binding?{binding}: {})});if(monthRef)tx.set(monthRef,monthValue);if(writeGift)writeGift();
         return {alreadyCommitted:false};
       });
       this.#lease=lease;this.persistDeviceLease();

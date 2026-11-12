@@ -1,3 +1,4 @@
+import {createCardGiftDriver} from './card-gift.mjs';
 import {createPersonalService} from './personal-sync.mjs';
 import {createPersonalController} from './personal-lists.mjs';
 import {createIntegration} from './client.mjs';
@@ -41,7 +42,9 @@ export function createRuntime({storage,config}){
  async function refresh(){const user=account.auth.currentUser;view.signedIn=!!user;view.verified=user?.emailVerified===true;if(user?.emailVerified){await account.profile();await account.load();view.name=account.cache.meta.name;view.started=account.cache.meta.stage==='active';view.deletion=account.cache.meta.deletionRequested===true;view.deletionState=view.deletion?(await account.deletionRequestStatus()).state:null;view.welcome=view.started?await account.welcomeClaimed():false;}emit();return getState();}
  function wallet(){if(storage.accountUid&&account.cache?.data){storage.writeConfirmedWallet(account.cache.data.wallet);window.MCP?.v150?.refreshWallet?.();}}
  function localData(){return readGameRecords(storage.readProgressRecords());}
- async function installGame(resolver){catalog=resolver;if(!storage.accountUid||!account.auth.currentUser||view.deletion||account.live)return null;driver=createGameDriver({account,scope:'mcp_account_v150:'+storage.accountUid+':',readLocal:localData,catalog});window.MCPGameRemote=driver;return driver;}
+ async function installGame(resolver){catalog=resolver;if(!storage.accountUid||!account.auth.currentUser||view.deletion||account.live)return null;driver=(config.gifts===true?createCardGiftDriver:createGameDriver)({account,prefix:storage.prefix,scope:'mcp_account_v150:'+storage.accountUid+':',readLocal:localData,catalog});window.MCPGameRemote=driver;return driver;}
+ function giftDriver(){const s=getState();if(config.gifts!==true||!s.selected||!s.verified||!s.started||s.deletion||!account.online||storage.prefix.includes('mcp_dev_v1:')||storage.prefix.includes('mcp_v150_stage:')&&account.production||!driver?.overview)throw Error('Schenken nur im verbundenen bestätigten Kontospiel');return driver;}
+ const giftOverview=()=>giftDriver().overview(),giftPrepare=async options=>{const d=giftDriver();if(!getState().canWrite||window.MCPGameBoundary?.state().phase!=='idle')throw Error('Aktuellen Stand laden und Gerät übernehmen');await d.read();return d.prepareGift(options);};
  async function boot(){
   await account.auth.authStateReady();const selected=io?.getItem(selectedKey);if(!account.auth.currentUser){if(selected)storage.activateCachedAccount(selected);view.notice=selected?'Bitte erneut anmelden. Dein Gaststand bleibt getrennt.':'';emit();return;}
   if(selected&&selected!==account.auth.currentUser.uid)io.removeItem(selectedKey);
@@ -82,5 +85,5 @@ export function createRuntime({storage,config}){
  async function resolvePending(){await account.takeOver();if(!driver)await installGame(catalog);await window.MCPGameBoundary.resolve(driver);location.reload();}
  async function prepareAction(){if(!driver||!storage.accountUid)throw Error('Kontospielstand noch nicht geladen');const loaded=await account.load();if(account.status!=='Gespeichert'||loaded.meta.deletionRequested)throw Error('Nur Ansicht: Gerät zuerst übernehmen');await setupRounds();if(!account.live){await account.claimDaily();wallet();}}
  window.addEventListener('offline',()=>{account.offline(true).then(()=>{view.notice='Offline · Sammlung nur ansehen';emit();});});window.addEventListener('online',()=>{roundGate=null;account.offline(false).then(async()=>{try{await setupRounds();}catch{}view.notice='Verbindung wieder da · aktuellen Stand laden';emit();});});
- return Object.freeze({state:getState,boot,signIn,sendVerification,checkVerification,resetPassword,startEmpty,openAccount,takeOver,logout,defer:logout,claimWelcome,claimGift,rename,inspectImport,importSelected,submitDeletion,deletionStatus,resolvePending,prepareAction,installGame,personalConnect,roundStatus,roundList,roundJoin,roundShare,roundLeave,roundCached,roundScope});
+ return Object.freeze({state:getState,boot,signIn,sendVerification,checkVerification,resetPassword,startEmpty,openAccount,takeOver,logout,defer:logout,claimWelcome,claimGift,rename,inspectImport,importSelected,submitDeletion,deletionStatus,resolvePending,prepareAction,installGame,giftOverview,giftPrepare,personalConnect,roundStatus,roundList,roundJoin,roundShare,roundLeave,roundCached,roundScope});
 }
