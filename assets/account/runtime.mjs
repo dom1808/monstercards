@@ -1,3 +1,5 @@
+import {createSetFavoritesController} from './set-favorites.mjs';
+import {createSetFavoritesService} from './set-favorites-sync.mjs';
 import {createCollectionController} from './collection-lists.mjs';
 import {createCollectionService} from './collection-sync.mjs';
 import {createCardGiftDriver} from './card-gift.mjs';
@@ -26,6 +28,17 @@ export function createRuntime({storage,config}){
   collectionService=createCollectionService(account,{selected:scope,prefix:storage.prefix,enabled:true});
   personalController=createCollectionController({uid,io,scope,lock:fn=>storage.requestLock('mcp_personal_sync_v1',fn),service:collectionService,prepareLegacy:async()=>{const old=createPersonalController({uid,io,scope,lock:fn=>storage.requestLock('mcp_personal_sync_v1',fn),service});try{await old.start();const status=old.state();if(!status.migrated||status.pending||status.error)throw Error(status.error||'Alte Listen zuerst synchronisieren');return await service.read();}finally{old.dispose();}},notify:()=>window.dispatchEvent(new Event('mcp-personal-sync-change'))});
   return personalController;
+ }
+
+ let setFavoritesController=null,setFavoritesUid=null;
+ function setFavoritesConnect(){
+  const uid=account.auth.currentUser?.uid;
+  if(config.personalSync!==true||!uid||storage.accountUid!==uid||!account.auth.currentUser.emailVerified||view.deletion||!view.started||account.live||storage.prefix.includes('mcp_dev_v1:')||storage.prefix.includes('mcp_v150_stage:')&&account.production)return null;
+  if(!navigator.locks)throw Error('Setfavoriten benötigen sichere lokale Schreibsperren');
+  if(setFavoritesController&&setFavoritesUid===uid)return setFavoritesController;
+  setFavoritesController?.dispose();setFavoritesUid=uid;
+  const scope=()=>{if(account.auth.currentUser?.uid!==uid||storage.accountUid!==uid||account.cache?.meta?.deletionRequested)throw Error('Konto gewechselt oder gesperrt');return uid;};
+  setFavoritesController=createSetFavoritesController({uid,io,scope,lock:fn=>storage.requestLock('mcp_set_favorites_lock_v1',fn),service:createSetFavoritesService(account,{selected:scope,prefix:storage.prefix,enabled:true}),canEdit:()=>account.status==='Gespeichert'&&account.online,notify:()=>window.dispatchEvent(new Event('mcp-set-favorites-change'))});return setFavoritesController;
  }
 
  async function sharedWishes(owner){personalConnect();if(!collectionService)throw Error('Wunschfreigaben benötigen ein bestätigtes eigenes Konto');return collectionService.readShared(owner);}
@@ -89,5 +102,5 @@ export function createRuntime({storage,config}){
  async function resolvePending(){await account.takeOver();if(!driver)await installGame(catalog);await window.MCPGameBoundary.resolve(driver);location.reload();}
  async function prepareAction(){if(!driver||!storage.accountUid)throw Error('Kontospielstand noch nicht geladen');const loaded=await account.load();if(account.status!=='Gespeichert'||loaded.meta.deletionRequested)throw Error('Nur Ansicht: Gerät zuerst übernehmen');await setupRounds();if(!account.live){await account.claimDaily();wallet();}}
  window.addEventListener('offline',()=>{account.offline(true).then(()=>{view.notice='Offline · Sammlung nur ansehen';emit();});});window.addEventListener('online',()=>{roundGate=null;account.offline(false).then(async()=>{try{await setupRounds();}catch{}view.notice='Verbindung wieder da · aktuellen Stand laden';emit();});});
- return Object.freeze({state:getState,boot,signIn,sendVerification,checkVerification,resetPassword,startEmpty,openAccount,takeOver,logout,defer:logout,claimWelcome,claimGift,rename,inspectImport,importSelected,submitDeletion,deletionStatus,resolvePending,prepareAction,installGame,giftOverview,giftPrepare,personalConnect,sharedWishes,roundStatus,roundList,roundJoin,roundShare,roundLeave,roundCached,roundScope});
+ return Object.freeze({state:getState,boot,signIn,sendVerification,checkVerification,resetPassword,startEmpty,openAccount,takeOver,logout,defer:logout,claimWelcome,claimGift,rename,inspectImport,importSelected,submitDeletion,deletionStatus,resolvePending,prepareAction,installGame,giftOverview,giftPrepare,personalConnect,setFavoritesConnect,sharedWishes,roundStatus,roundList,roundJoin,roundShare,roundLeave,roundCached,roundScope});
 }
