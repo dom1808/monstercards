@@ -66,7 +66,7 @@ export function createRuntime({storage,config}){
   await account.auth.authStateReady();const selected=io?.getItem(selectedKey);if(!account.auth.currentUser){if(selected)storage.activateCachedAccount(selected);view.notice=selected?'Bitte erneut anmelden. Dein Gaststand bleibt getrennt.':'';emit();return;}
   if(selected&&selected!==account.auth.currentUser.uid)io.removeItem(selectedKey);
   account.restoreDeviceLease();await refresh();
-  if(selected&&account.auth.currentUser.uid===selected){if(view.deletion){storage.activateCachedAccount(selected);view.notice='Löschung angefragt · Bearbeitung innerhalb von sieben Tagen';}else if(view.started){if(account.status==='Gespeichert'&&!account.live)await account.claimDaily();storage.activateAccount(selected,gameRecords(account.cache.data));}else{io.removeItem(selectedKey);}}
+  if(selected&&account.auth.currentUser.uid===selected){if(view.deletion){storage.activateCachedAccount(selected);view.notice='Löschung angefragt · Bearbeitung über euren privaten Kontakt';}else if(view.started){if(account.status==='Gespeichert'&&!account.live)await account.claimDaily();storage.activateAccount(selected,gameRecords(account.cache.data));}else{io.removeItem(selectedKey);}}
   try{await setupRounds(true);}catch(e){view.roundsNotice='Sammlerrunde nicht erreichbar · erneut verbinden';}
   account.onChange=()=>{view.notice=account.status;emit();};emit();
  }
@@ -97,7 +97,7 @@ export function createRuntime({storage,config}){
   const current=await account.load();if(current.meta.stage==='active'&&!current.meta.imported&&!current.meta.hasProgress)await account.takeOver();
   await account.importPrepared(prepared.data,async backup=>{const original=io.getItem('mcp_account_backup_v150:'+uid+':'+prepared.digest);if(original!==raw||backup.digest!==prepared.digest)throw Error('Originalsicherung nicht mehr bestätigt');return backup.digest;},{operation:prepared.operation});io.removeItem(key);select(uid);location.reload();
  }
- async function submitDeletion(password,confirmed){if(!confirmed)throw Error('Bitte die Folgen bestätigen');await account.submitDeletionRequest(password,'KONTOLÖSCHUNG BEANTRAGEN');await refresh();view.notice='Löschung angefragt · Bearbeitung innerhalb von sieben Tagen. Abschluss über euren bestehenden privaten Kontakt.';emit();}
+ async function submitDeletion(password,confirmed){if(!confirmed)throw Error('Bitte die Folgen bestätigen');await account.submitDeletionRequest(password,'KONTOLÖSCHUNG BEANTRAGEN');await refresh();view.notice='Löschung angefragt · Bitte Betreiber kontaktieren. Abschluss über euren bestehenden privaten Kontakt.';emit();}
  async function deletionStatus(){return account.deletionRequestStatus();}
  async function resolvePending(){await account.takeOver();if(!driver)await installGame(catalog);await window.MCPGameBoundary.resolve(driver);location.reload();}
  async function prepareAction(){if(!driver||!storage.accountUid)throw Error('Kontospielstand noch nicht geladen');const loaded=await account.load();if(account.status!=='Gespeichert'||loaded.meta.deletionRequested)throw Error('Nur Ansicht: Gerät zuerst übernehmen');await setupRounds();if(!account.live){await account.claimDaily();wallet();}}
