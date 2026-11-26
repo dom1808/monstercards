@@ -25,7 +25,7 @@ export function createRuntime({storage,config}){
   personalController?.dispose();personalUid=uid;
   const scope=()=>{if(account.auth.currentUser?.uid!==uid||storage.accountUid!==uid||account.cache?.meta?.deletionRequested)throw Error('Konto gewechselt oder gesperrt');return uid;};
   const service=createPersonalService(account,{selected:scope,prefix:storage.prefix,enabled:true});
-  collectionService=createCollectionService(account,{selected:scope,prefix:storage.prefix,enabled:true});
+  collectionService=createCollectionService(account,{selected:scope,prefix:storage.prefix,enabled:true,albumsEnabled:config.multiAlbums===true});
   personalController=createCollectionController({uid,io,scope,lock:fn=>storage.requestLock('mcp_personal_sync_v1',fn),service:collectionService,prepareLegacy:async()=>{const old=createPersonalController({uid,io,scope,lock:fn=>storage.requestLock('mcp_personal_sync_v1',fn),service});try{await old.start();const status=old.state();if(!status.migrated||status.pending||status.error)throw Error(status.error||'Alte Listen zuerst synchronisieren');return await service.read();}finally{old.dispose();}},notify:()=>window.dispatchEvent(new Event('mcp-personal-sync-change'))});
   return personalController;
  }
@@ -41,6 +41,8 @@ export function createRuntime({storage,config}){
   setFavoritesController=createSetFavoritesController({uid,io,scope,lock:fn=>storage.requestLock('mcp_set_favorites_lock_v1',fn),service:createSetFavoritesService(account,{selected:scope,prefix:storage.prefix,enabled:true}),canEdit:()=>account.status==='Gespeichert'&&account.online,notify:()=>window.dispatchEvent(new Event('mcp-set-favorites-change'))});return setFavoritesController;
  }
 
+ async function sharedAlbumList(owner){personalConnect();if(!collectionService)throw Error('Eigenes Konto zuerst verbinden');return collectionService.readSharedAlbums(owner);}
+ async function sharedAlbum(owner,id){personalConnect();if(!collectionService)throw Error('Eigenes Konto zuerst verbinden');return collectionService.readSharedAlbum(owner,id);}
  async function sharedWishes(owner){personalConnect();if(!collectionService)throw Error('Wunschfreigaben benötigen ein bestätigtes eigenes Konto');return collectionService.readShared(owner);}
  async function setupRounds(close=false){
   const uid=account.auth.currentUser?.uid;
@@ -55,7 +57,7 @@ export function createRuntime({storage,config}){
  const roundCached=()=>roundService?.cached()||null,roundScope=()=>{if(!roundService||account.auth.currentUser?.uid!==storage.accountUid)throw Error('Konto gewechselt');return roundService.scope();};
  const requireStorage=()=>{if(!usable)throw Error('Dauerhaftes Speichern ist gesperrt. Gastspielen bleibt möglich.');};
  function select(uid){io.setItem(selectedKey,uid);if(io.getItem(selectedKey)!==uid)throw Error('Kontowahl nicht dauerhaft gespeichert');}
- function getState(){const user=account.auth.currentUser;return {...view,pendingImport:!!user&&!!io?.getItem('mcp_account_import_pending_v150:'+user.uid),hasProgress:account.cache?.meta.hasProgress,imported:account.cache?.meta.imported,signedIn:!!user,verified:user?.emailVerified===true,selected:!!storage.accountUid&&(!user||user.uid===storage.accountUid),canWrite:!!user&&user.uid===storage.accountUid&&account.status==='Gespeichert'&&account.online&&!view.deletion,name:account.cache?.meta.name||view.name};}
+ function getState(){const user=account.auth.currentUser;return {multiAlbums:config.multiAlbums===true,...view,pendingImport:!!user&&!!io?.getItem('mcp_account_import_pending_v150:'+user.uid),hasProgress:account.cache?.meta.hasProgress,imported:account.cache?.meta.imported,signedIn:!!user,verified:user?.emailVerified===true,selected:!!storage.accountUid&&(!user||user.uid===storage.accountUid),canWrite:!!user&&user.uid===storage.accountUid&&account.status==='Gespeichert'&&account.online&&!view.deletion,name:account.cache?.meta.name||view.name};}
  async function refresh(){const user=account.auth.currentUser;view.signedIn=!!user;view.verified=user?.emailVerified===true;if(user?.emailVerified){await account.profile();await account.load();view.name=account.cache.meta.name;view.started=account.cache.meta.stage==='active';view.deletion=account.cache.meta.deletionRequested===true;view.deletionState=view.deletion?(await account.deletionRequestStatus()).state:null;view.welcome=view.started?await account.welcomeClaimed():false;}emit();return getState();}
  function wallet(){if(storage.accountUid&&account.cache?.data){storage.writeConfirmedWallet(account.cache.data.wallet);window.MCP?.v150?.refreshWallet?.();}}
  function localData(){return readGameRecords(storage.readProgressRecords());}
@@ -102,5 +104,5 @@ export function createRuntime({storage,config}){
  async function resolvePending(){await account.takeOver();if(!driver)await installGame(catalog);await window.MCPGameBoundary.resolve(driver);location.reload();}
  async function prepareAction(){if(!driver||!storage.accountUid)throw Error('Kontospielstand noch nicht geladen');const loaded=await account.load();if(account.status!=='Gespeichert'||loaded.meta.deletionRequested)throw Error('Nur Ansicht: Gerät zuerst übernehmen');await setupRounds();if(!account.live){await account.claimDaily();wallet();}}
  window.addEventListener('offline',()=>{account.offline(true).then(()=>{view.notice='Offline · Sammlung nur ansehen';emit();});});window.addEventListener('online',()=>{roundGate=null;account.offline(false).then(async()=>{try{await setupRounds();}catch{}view.notice='Verbindung wieder da · aktuellen Stand laden';emit();});});
- return Object.freeze({state:getState,boot,signIn,sendVerification,checkVerification,resetPassword,startEmpty,openAccount,takeOver,logout,defer:logout,claimWelcome,claimGift,rename,inspectImport,importSelected,submitDeletion,deletionStatus,resolvePending,prepareAction,installGame,giftOverview,giftPrepare,personalConnect,setFavoritesConnect,sharedWishes,roundStatus,roundList,roundJoin,roundShare,roundLeave,roundCached,roundScope});
+ return Object.freeze({state:getState,boot,signIn,sendVerification,checkVerification,resetPassword,startEmpty,openAccount,takeOver,logout,defer:logout,claimWelcome,claimGift,rename,inspectImport,importSelected,submitDeletion,deletionStatus,resolvePending,prepareAction,installGame,giftOverview,giftPrepare,personalConnect,setFavoritesConnect,sharedWishes,sharedAlbumList,sharedAlbum,roundStatus,roundList,roundJoin,roundShare,roundLeave,roundCached,roundScope});
 }
